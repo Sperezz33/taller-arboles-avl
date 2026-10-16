@@ -1,0 +1,2629 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Taller para estudiar árboles BST y AVL: rotaciones, eliminación con predecesor, Python, tuplas con prioridad, 2-3 y Rojo-Negro.">
+<style>body{margin:0}</style>
+<title>Taller de Árboles AVL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one-column workbench on engineering graph paper; tabs on top; each exercise is a card with tree drawings inline */
+:root{
+  --bg:#f2f4ef; --panel:#ffffff; --fg:#1b2430; --muted:#5b6676; --line:#d3d9d0; --grid:#e3e8df;
+  --accent:#2747b0; --accent-soft:#e2e8fa; --ok:#1b7a4b; --ok-soft:#dcf1e5; --bad:#bf3a31; --bad-soft:#fae3e0;
+  --warn:#b8620f; --warn-soft:#fcecd9; --node:#ffffff; --code-bg:#eef1ec; --rb-red:#cf3b3b; --rb-black:#20252d; --rb-text:#ffffff;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141a; --panel:#171d25; --fg:#e3e8ef; --muted:#95a1b3; --line:#2a333f; --grid:#151a21;
+    --accent:#8aa5ff; --accent-soft:#1e2948; --ok:#4cc38a; --ok-soft:#12301f; --bad:#ff7d73; --bad-soft:#3b1a19;
+    --warn:#f0a54a; --warn-soft:#3a2914; --node:#1c2430; --code-bg:#121820; --rb-red:#de4f4c; --rb-black:#04060a; --rb-text:#ffffff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141a; --panel:#171d25; --fg:#e3e8ef; --muted:#95a1b3; --line:#2a333f; --grid:#151a21;
+  --accent:#8aa5ff; --accent-soft:#1e2948; --ok:#4cc38a; --ok-soft:#12301f; --bad:#ff7d73; --bad-soft:#3b1a19;
+  --warn:#f0a54a; --warn-soft:#3a2914; --node:#1c2430; --code-bg:#121820; --rb-red:#de4f4c; --rb-black:#04060a; --rb-text:#ffffff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background-color:var(--bg); color:var(--fg); font-family:var(--f-body); font-size:16px; line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px;margin-bottom:14px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,4vw,36px);letter-spacing:-.02em;margin:0;line-height:1.1;text-wrap:balance}
+h1 span{color:var(--accent)}
+.tagline{color:var(--muted);margin:0;font-size:15px}
+nav.tabs{display:flex;flex-wrap:wrap;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:20px}
+nav.tabs button{font-family:var(--f-display);font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:8px 14px;border-radius:8px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+nav.tabs button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,.choice:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0 0 8px;text-wrap:balance}
+h4{font-family:var(--f-display);font-weight:700;font-size:16px;margin:14px 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)} .small{font-size:14px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.eyebrow{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.statement{font-size:20px;font-family:var(--f-display);font-weight:500;margin:4px 0 14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label,.lbl{font-weight:700;font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+input[type=text],input[type=number],input:not([type]),select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0}
+input.mono,.mono{font-family:var(--f-mono);font-size:14px}
+input.wide{width:100%}
+.btn{font-family:var(--f-display);font-weight:700;font-size:14px;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.btn.ghost{background:transparent}
+.btn:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end;margin-bottom:16px}
+.toolbar label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:700 14px var(--f-display);border:0;background:var(--panel);color:var(--fg);padding:8px 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;background:var(--bg);font-size:14px}
+.choice input{accent-color:var(--accent)}
+.choice b{font-family:var(--f-mono)}
+.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.fb{border-radius:10px;padding:12px 14px;margin-top:12px;border:1px solid var(--line)}
+.fb.ok{background:var(--ok-soft);border-color:var(--ok)}
+.fb.bad{background:var(--bad-soft);border-color:var(--bad)}
+.fb .verdict{font-family:var(--f-display);font-weight:800;font-size:17px;margin-bottom:4px}
+.fb.ok .verdict{color:var(--ok)} .fb.bad .verdict{color:var(--bad)}
+.answer{font-family:var(--f-mono);font-size:14px;background:var(--code-bg);border-radius:8px;padding:8px 10px;overflow-x:auto}
+ol.steps{margin:8px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.trees{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+.trees>figure{margin:0;flex:1 1 300px;min-width:0;border:1px dashed var(--line);border-radius:10px;padding:8px;background:var(--panel)}
+figcaption{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.treebox{overflow-x:auto;padding:4px 0}
+.treebox svg{display:block;margin:0 auto;max-width:none}
+svg .edges line{stroke:var(--muted);stroke-width:1.6}
+svg .nd rect{fill:var(--node);stroke:var(--fg);stroke-width:1.5}
+svg .nd text{fill:var(--fg);font-family:var(--f-mono);font-size:14px;font-weight:600;text-anchor:middle}
+svg .nd text.bf{font-size:11px;fill:var(--accent);text-anchor:start;font-weight:600}
+svg .nd text.bf.bfbad{fill:var(--bad);font-size:13px;font-weight:800}
+svg .nd text.sub{font-size:11px;fill:var(--muted);font-weight:400}
+svg .nd.new rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
+svg .nd.piv rect{fill:var(--warn-soft);stroke:var(--warn);stroke-width:3}
+svg .nd.rot rect{stroke:var(--accent);stroke-width:2.5}
+svg .nd.gone rect{fill:var(--bad-soft);stroke:var(--bad);stroke-width:2.5}
+svg .nd.T rect{fill:transparent;stroke-dasharray:4 3;stroke:var(--muted)}
+svg .nd.T text{fill:var(--muted);font-weight:400}
+svg .nd.R rect{fill:var(--rb-red);stroke:var(--rb-red)} svg .nd.R text{fill:var(--rb-text)}
+svg .nd.B rect{fill:var(--rb-black);stroke:var(--fg)} svg .nd.B text{fill:var(--rb-text)}
+svg .n23 rect{fill:var(--node);stroke:var(--fg);stroke-width:1.5}
+svg .n23 line{stroke:var(--fg);stroke-width:1.2}
+svg .n23 text{fill:var(--fg);font-family:var(--f-mono);font-size:14px;font-weight:600;text-anchor:middle}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.chip{font-family:var(--f-mono);font-size:13px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.chip.done{color:var(--muted);text-decoration:line-through}
+.chip.cur{background:var(--accent);color:var(--panel);border-color:var(--accent);font-weight:600}
+.stats{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+.stats b{color:var(--fg)}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.q{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.q.ok{border-color:var(--ok);background:var(--ok-soft)} .q.bad{border-color:var(--bad);background:var(--bad-soft)}
+.q .res{font-size:14px}
+table.t{border-collapse:collapse;width:100%;font-size:15px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+table.t th{font-family:var(--f-display);font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+table.t td code,code{font-family:var(--f-mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+.tscroll{overflow-x:auto}
+pre.code{font-family:var(--f-mono);font-size:13.5px;line-height:1.6;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:8px 0;white-space:pre;tab-size:4}
+pre.code input.blank{font-family:var(--f-mono);font-size:13.5px;padding:1px 4px;border:1px solid var(--accent);border-radius:4px;background:var(--panel);color:var(--fg)}
+pre.code input.blank.okb{border-color:var(--ok);background:var(--ok-soft)}
+pre.code input.blank.badb{border-color:var(--bad);background:var(--bad-soft)}
+.kw{color:var(--accent);font-weight:600}
+.cm{color:var(--muted);font-style:italic}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.recipe li{counter-increment:r;padding-left:38px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--panel);font:800 14px var(--f-display);display:grid;place-items:center}
+.callout{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+.callout.blue{border-left-color:var(--accent);background:var(--accent-soft)}
+.timeline{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px}
+.timeline .tm{font-family:var(--f-mono);font-size:13px;color:var(--accent);font-weight:600;white-space:nowrap;padding-top:2px}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:10px;background:var(--panel)}
+details summary{cursor:pointer;font-weight:700;font-family:var(--f-display)}
+details[open] summary{margin-bottom:8px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.tf{display:flex;gap:6px}
+.tf .btn{padding:4px 12px}
+.pair{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pair .mono{min-width:220px}
+.mark-ok{color:var(--ok);font-weight:800} .mark-bad{color:var(--bad);font-weight:800}
+.note{font-size:14px;color:var(--muted)}
+.codearea{width:100%;min-height:340px;font-family:var(--f-mono);font-size:14px;line-height:1.6;background:var(--code-bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;tab-size:4;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+.codearea:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+ul.checks{list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:6px}
+ul.checks li{display:block;padding-left:24px;position:relative;font-size:15px}
+ul.checks li>span:first-child{position:absolute;left:0;top:0;font-weight:800}
+ul.checks li.cok>span:first-child{color:var(--ok)} ul.checks li.cbad>span:first-child{color:var(--bad)}
+.cmp figure{margin:0;min-width:0} .cmp pre.code{margin:4px 0 0}
+.ln{display:inline-block;width:2.4em;color:var(--muted);user-select:none;-webkit-user-select:none}
+
+.lab{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.labbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.labtip{margin:0;min-height:1.2em}
+.labscroll{overflow-x:auto;border:1px dashed var(--line);border-radius:10px;background:var(--panel);padding-block:6px}
+.labsvg{display:block;margin:0 auto;max-width:none;user-select:none;-webkit-user-select:none}
+.labsvg .lnode{cursor:grab;touch-action:none}
+.lab.m-place .lnode,.lab.m-view .lnode{cursor:default}
+.lab.m-pick .lnode{cursor:pointer}
+.lab.m-pick .lnode:hover rect{stroke:var(--accent);stroke-width:3}
+.labsvg .lnode.sel rect{stroke:var(--accent);stroke-width:3.5}
+.labsvg .lnode.droptarget rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:3;stroke-dasharray:5 3}
+.labsvg .lnode.dragging{cursor:grabbing;opacity:.9}
+.labsvg .slot{cursor:pointer}
+.labsvg .slot circle{fill:var(--panel);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.labsvg .slot text{fill:var(--accent);font:700 15px var(--f-mono);text-anchor:middle}
+.labsvg .slot:hover circle{fill:var(--accent-soft)}
+.labsvg .slot.wrong circle{stroke:var(--bad);fill:var(--bad-soft)}
+.labsvg line.slotedge{stroke:var(--accent);stroke-dasharray:4 4;stroke-width:1.2;opacity:.6}
+.hmsg{border-radius:8px;padding:10px 12px;background:var(--accent-soft);font-size:15px;margin-top:6px}
+.hmsg.bad{background:var(--bad-soft)} .hmsg.ok{background:var(--ok-soft)}
+
+.sympad{display:flex;flex-wrap:wrap;gap:6px}
+.sym{font-family:var(--f-mono);font-size:15px;min-width:38px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}
+.sym:hover{border-color:var(--accent);color:var(--accent)}
+.sym:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+input.mathin{font-size:18px}
+kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel)}
+@media (prefers-reduced-motion:no-preference){.fb{animation:pop .18s ease-out}@keyframes pop{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+@media (max-width:520px){.statement{font-size:18px}.card{padding:14px}.pair .mono{min-width:0}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Taller de Árboles <span>AVL</span></h1>
+    <p class="tagline">BST · AVL · Python · tuplas con prioridad · 2-3 y Rojo-Negro</p>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button role="tab" data-tab="guia">Guía</button>
+    <button role="tab" data-tab="drill">Rotaciones rápidas</button>
+    <button role="tab" data-tab="taller">Taller libre</button>
+    <button role="tab" data-tab="series">Series</button>
+    <button role="tab" data-tab="parcial">Parcial simulado</button>
+    <button role="tab" data-tab="python">Python</button>
+    <button role="tab" data-tab="tuplas">Tuplas</button>
+    <button role="tab" data-tab="otros">2-3 y Rojo-Negro</button>
+  </nav>
+
+  <!-- ===================== GUÍA ===================== -->
+  <section id="tab-guia" class="stack" role="tabpanel">
+    <div class="card">
+      <h2>Plan para esta noche</h2>
+      <p class="muted">Parcial a las 10:00. Lo más valioso es <b>repetir rotaciones</b> hasta que salgan sin pensar, y luego el código.</p>
+      <div class="timeline">
+        <div class="tm">22:45–23:15</div><div>Esta guía: la receta AVL y la <b>regla del medio</b>.</div>
+        <div class="tm">23:15–00:30</div><div><b>Rotaciones rápidas → Inserción</b> hasta acertar 10 seguidas.</div>
+        <div class="tm">00:30–01:15</div><div><b>Rotaciones rápidas → Eliminación</b> (con predecesor).</div>
+        <div class="tm">01:15–02:15</div><div><b>Parcial simulado</b> completo, a mano en papel, y la página le corrige.</div>
+        <div class="tm">02:15–02:30</div><div>Descanso. Agua, estirarse.</div>
+        <div class="tm">02:30–04:30</div><div><b>Python</b>: ejercicios 1 a 10. Escriba cada uno en papel antes de llenarlo.</div>
+        <div class="tm">04:30–05:15</div><div><b>Tuplas</b> con prioridad (el punto 2 del parcial).</div>
+        <div class="tm">05:15–05:45</div><div><b>2-3 y Rojo-Negro</b>: solo las reglas y la inserción.</div>
+        <div class="tm">05:45–08:15</div><div>Dormir. Aunque sean 2 horas: mientras duerme, el cerebro fija lo que practicó.</div>
+        <div class="tm">08:15–09:00</div><div>Un último parcial simulado + releer esta guía.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>BST en un minuto</h2>
+      <p>En cada nodo: <b>todo lo de la izquierda es menor</b>, <b>todo lo de la derecha es mayor</b>. Se inserta bajando desde la raíz (menor → izquierda, mayor → derecha) hasta encontrar un hueco.</p>
+      <h4>Eliminar: tres casos</h4>
+      <ol class="recipe">
+        <li><b>Hoja</b>: se quita y listo.</li>
+        <li><b>Un hijo</b>: el hijo sube a ocupar su lugar.</li>
+        <li><b>Dos hijos</b>: se reemplaza por su <b>predecesor</b> = el mayor del subárbol izquierdo. Para encontrarlo: <b>un paso a la izquierda, y luego todo a la derecha</b> hasta que no se pueda más. Ese predecesor se quita de donde estaba (allí siempre es hoja o tiene un solo hijo, a la izquierda).</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Medidas del árbol (raíz en nivel 0)</h2>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>Medida</th><th>Qué es</th><th>Ejemplo (árbol de abajo)</th></tr></thead>
+        <tbody id="medidasBody"></tbody>
+      </table></div>
+      <div id="medidasTree"></div>
+      <p class="note">Si el profe cuenta la altura en nodos (y no en aristas), es la misma más 1. Con raíz = nivel 0, lo normal es contar aristas: una hoja tiene altura 0.</p>
+    </div>
+
+    <div class="card">
+      <h2>AVL: la receta mecánica</h2>
+      <p><b>FB</b> (factor de balance) = altura(izquierda) − altura(derecha). Árbol vacío = −1, hoja = 0. Un AVL está bien si <b>todos</b> los nodos tienen FB −1, 0 o +1.</p>
+      <ol class="recipe">
+        <li>Inserte el número como en un BST normal.</li>
+        <li>Suba desde el nodo nuevo hacia la raíz recalculando FB. El <b>primer</b> nodo con FB +2 o −2 que encuentre es el <b>pivote</b> (el más profundo desbalanceado). En inserción solo se arregla ese y el resto se arregla solo.</li>
+        <li>Desde el pivote, mire los <b>dos primeros pasos</b> del camino hacia el nodo nuevo:
+          <div class="tscroll"><table class="t" style="margin-top:6px">
+            <thead><tr><th>Camino</th><th>Caso</th><th>Qué se hace</th></tr></thead>
+            <tbody>
+              <tr><td>izquierda, izquierda</td><td><code>LL</code></td><td>Una rotación a la <b>derecha</b> sobre el pivote</td></tr>
+              <tr><td>derecha, derecha</td><td><code>RR</code></td><td>Una rotación a la <b>izquierda</b> sobre el pivote</td></tr>
+              <tr><td>izquierda, derecha</td><td><code>LR</code></td><td>Izquierda sobre el hijo, luego derecha sobre el pivote</td></tr>
+              <tr><td>derecha, izquierda</td><td><code>RL</code></td><td>Derecha sobre el hijo, luego izquierda sobre el pivote</td></tr>
+            </tbody>
+          </table></div>
+          Línea recta = 1 rotación. Zig-zag = 2 rotaciones.
+        </li>
+        <li>Rote y verifique que todos los FB quedaron en −1, 0 o +1.</li>
+      </ol>
+      <p class="note">Los nombres cambian según el profe: a LL algunos le dicen "rotación simple a la derecha" o "II". Lo que importa es la forma.</p>
+
+      <div class="callout blue">
+        <b>Regla del medio (el truco para hacerlo a mano sin perderse).</b> Tome los 3 nodos del camino: pivote, hijo y nieto. Ordénelos por valor: <b>a &lt; b &lt; c</b>. El del medio (<b>b</b>) queda arriba, <b>a</b> a su izquierda y <b>c</b> a su derecha. Los subárboles que colgaban de esos tres (máximo 4) se cuelgan de nuevo <b>en orden de izquierda a derecha</b>: T1 y T2 bajo <b>a</b>, T3 y T4 bajo <b>c</b>. Funciona igual para los 4 casos.
+      </div>
+      <div id="trinode"></div>
+      <h4>Los 4 casos, con el ejemplo más pequeño</h4>
+      <div id="casos4" class="cols"></div>
+    </div>
+
+    <div class="card">
+      <h2>Eliminar en AVL</h2>
+      <ol class="recipe">
+        <li>Elimine como en BST (hoja / un hijo / <b>predecesor</b>).</li>
+        <li>Suba desde el padre del nodo que se quitó <b>físicamente</b> hasta la raíz, revisando FB.</li>
+        <li>Si un nodo queda en ±2, el <b>hijo</b> que se mira es el del lado <b>más alto</b> (el lado contrario de donde se borró). Si ese hijo tiene FB 0, se trata como línea recta: <b>rotación simple</b>.</li>
+        <li><b>No pare después de la primera rotación.</b> En eliminación puede haber más de una: siga subiendo hasta la raíz.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Errores típicos</h2>
+      <ul>
+        <li>Escoger como pivote la raíz cuando el desbalanceado más profundo está más abajo.</li>
+        <li>En LR o RL hacer solo una rotación.</li>
+        <li>Perder el subárbol del medio (T2 o T3) al rotar: siempre se reubica, nunca desaparece.</li>
+        <li>Usar el sucesor en vez del predecesor.</li>
+        <li>En eliminación, detenerse tras la primera rotación.</li>
+        <li>En la serie: listar mal un término (revise dos veces; un número malo daña todo el árbol).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== DRILL ===================== -->
+  <section id="tab-drill" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Rotaciones rápidas</h2>
+      <p class="muted">Árboles pequeños al azar. En <b>Hacerlo yo</b>: ponga el nodo en su hueco y rote <b>arrastrando un nodo encima de su padre</b>. En <b>Elegir respuesta</b>: diga qué rotación toca (<kbd>Enter</kbd> revisa).</p>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Tipo">
+          <button id="dIns" aria-pressed="true" data-act="dMode" data-m="ins">Inserción</button>
+          <button id="dDel" aria-pressed="false" data-act="dMode" data-m="del">Eliminación</button>
+        </div>
+        <div class="seg" role="group" aria-label="Forma de responder">
+          <button id="dHand" aria-pressed="true" data-act="dHands" data-h="1">Hacerlo yo (arrastrar)</button>
+          <button id="dAns" aria-pressed="false" data-act="dHands" data-h="0">Elegir respuesta</button>
+        </div>
+        <label class="row" style="flex-direction:row;align-items:center"><input type="checkbox" id="dShowBF"> Mostrar FB del árbol inicial</label>
+        <div class="stats" id="dStats"></div>
+      </div>
+      <div id="dBody"></div>
+    </div>
+  </section>
+
+  <!-- ===================== TALLER LIBRE ===================== -->
+  <section id="tab-taller" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Taller libre</h2>
+      <p class="muted">Inserte números uno por uno. Usted escoge el hueco donde va cada uno y hace las rotaciones arrastrando nodos. La página le dice si quedó un AVL válido.</p>
+      <div class="toolbar">
+        <label for="wNum">Número<input id="wNum" type="number" data-enter="wIns" style="width:110px"></label>
+        <button class="btn primary" data-act="wIns">Insertar</button>
+        <button class="btn" data-act="wRand">Uno al azar</button>
+        <button class="btn" data-act="wDel">Eliminar el seleccionado</button>
+        <label for="wMode">Modo<select id="wMode"><option value="manual">AVL: yo balanceo</option><option value="auto">AVL automático</option><option value="bst">BST (sin balancear)</option></select></label>
+        <label class="row" style="flex-direction:row;align-items:center"><input type="checkbox" id="wSpot" checked> Yo escojo el hueco y el predecesor</label>
+        <button class="btn ghost" data-act="wClear">Vaciar</button>
+      </div>
+      <div id="wStatus" class="hmsg"></div>
+      <div id="wLab"></div>
+      <div class="actions"><button class="btn" data-act="wHint">Pista</button><button class="btn ghost" data-act="wFix">Balancear por mí</button></div>
+      <div id="wLog"></div>
+      <details><summary>Recorridos y medidas del árbol actual</summary><div id="wInfo"></div></details>
+    </div>
+  </section>
+
+  <!-- ===================== SERIES ===================== -->
+  <section id="tab-series" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>De palabras a fórmula</h2>
+      <p>Casi toda serie es <b>una base</b> + <b>algo que le hacen</b>. "Los <u>primos</u> <u>más 1</u>" → base pₙ, le hacen + 1 → <b>aₙ = pₙ + 1, n ≥ 1</b>.</p>
+      <ol class="recipe">
+        <li><b>Subraye el sustantivo</b> (primos, pares, cuadrados…). Esa es la base: tabla 1.</li>
+        <li><b>Subraye lo que le hacen</b> (más, menos, el doble, signo alternado…): tabla 2.</li>
+        <li>Escriba <b>aₙ = (lo que le hacen aplicado a la base), n ≥ 1</b>.</li>
+        <li><b>Verifique</b>: reemplace n = 1, 2, 3 y mire que dé lo que dice la frase.</li>
+      </ol>
+      <div class="cols">
+        <div class="tscroll"><h4>Tabla 1 · Bases</h4><table class="t">
+          <thead><tr><th>Si dice…</th><th>Escriba</th><th>Da</th></tr></thead><tbody>
+          <tr><td>los naturales</td><td class="mono">n</td><td class="mono">1, 2, 3, 4</td></tr>
+          <tr><td>los pares</td><td class="mono">2n</td><td class="mono">2, 4, 6, 8</td></tr>
+          <tr><td>los impares</td><td class="mono">2n − 1</td><td class="mono">1, 3, 5, 7</td></tr>
+          <tr><td>los múltiplos de 5</td><td class="mono">5n</td><td class="mono">5, 10, 15, 20</td></tr>
+          <tr><td>los cuadrados (perfectos)</td><td class="mono">n²</td><td class="mono">1, 4, 9, 16</td></tr>
+          <tr><td>los cubos</td><td class="mono">n³</td><td class="mono">1, 8, 27, 64</td></tr>
+          <tr><td>los primos</td><td class="mono">pₙ (el n-ésimo primo)</td><td class="mono">2, 3, 5, 7, 11</td></tr>
+          <tr><td>las potencias de 2</td><td class="mono">2ⁿ</td><td class="mono">2, 4, 8, 16</td></tr>
+          <tr><td>los triangulares</td><td class="mono">n(n + 1)/2</td><td class="mono">1, 3, 6, 10</td></tr>
+          <tr><td>los factoriales</td><td class="mono">n!</td><td class="mono">1, 2, 6, 24</td></tr>
+          <tr><td>Fibonacci</td><td class="mono">a₁ = 1, a₂ = 1, aₙ = aₙ₋₁ + aₙ₋₂</td><td class="mono">1, 1, 2, 3, 5</td></tr>
+          </tbody></table></div>
+        <div class="tscroll"><h4>Tabla 2 · Lo que le hacen (X = la base)</h4><table class="t">
+          <thead><tr><th>Si dice…</th><th>Escriba</th><th>Ejemplo</th></tr></thead><tbody>
+          <tr><td>más 3</td><td class="mono">X + 3</td><td class="mono">pₙ + 3</td></tr>
+          <tr><td>menos 1</td><td class="mono">X − 1</td><td class="mono">n² − 1</td></tr>
+          <tr><td>el doble de</td><td class="mono">2·X</td><td class="mono">2·(2n − 1)</td></tr>
+          <tr><td>la mitad de</td><td class="mono">X / 2</td><td class="mono">2ⁿ / 2</td></tr>
+          <tr><td>al cuadrado</td><td class="mono">X²</td><td class="mono">(2n − 1)²</td></tr>
+          <tr><td>100 menos…</td><td class="mono">100 − X</td><td class="mono">100 − 5n</td></tr>
+          <tr><td>signo alternado, empieza negativo</td><td class="mono">(−1)ⁿ · X</td><td class="mono">−1, 2, −3, 4</td></tr>
+          <tr><td>signo alternado, empieza positivo</td><td class="mono">(−1)ⁿ⁺¹ · X</td><td class="mono">1, −2, 3, −4</td></tr>
+          <tr><td>el residuo de dividir X entre 7</td><td class="mono">X mod 7</td><td class="mono">n² mod 7</td></tr>
+          <tr><td>cada término es … del anterior</td><td class="mono">a₁ = …, aₙ = … aₙ₋₁</td><td class="mono">a₁ = 3, aₙ = 2·aₙ₋₁</td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="callout blue"><b>Paréntesis:</b> si la base tiene un + o un − adentro (como 2n − 1) y le hace algo encima (cuadrado, doble, restarla), enciérrela: <b>(2n − 1)²</b>, <b>100 − (2n − 1)</b>.<br><b>Signo alternado:</b> (−1)ⁿ con n = 1 da −1, así que empieza negativo. Si debe empezar positivo, súmele 1 al exponente: (−1)ⁿ⁺¹.<br><b>"El anterior":</b> si la frase habla del término anterior, la fórmula es recursiva: se da a₁ y la regla usa aₙ₋₁.</div>
+      <h4>Cinco ejemplos resueltos</h4>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>Frase</th><th>Base → le hacen</th><th>Fórmula</th><th>Verificación</th></tr></thead><tbody>
+        <tr><td>Todos los primos más 1</td><td>pₙ → + 1</td><td class="mono">aₙ = pₙ + 1, n ≥ 1</td><td class="mono">3, 4, 6, 8, 12</td></tr>
+        <tr><td>Los impares al cuadrado</td><td>2n − 1 → ²</td><td class="mono">aₙ = (2n − 1)², n ≥ 1</td><td class="mono">1, 9, 25, 49</td></tr>
+        <tr><td>Cien menos los múltiplos de 5</td><td>5n → 100 −</td><td class="mono">aₙ = 100 − 5n, n ≥ 1</td><td class="mono">95, 90, 85</td></tr>
+        <tr><td>Los naturales con signo alternado, empezando en negativo</td><td>n → (−1)ⁿ ·</td><td class="mono">aₙ = (−1)ⁿ · n, n ≥ 1</td><td class="mono">−1, 2, −3, 4</td></tr>
+        <tr><td>Cada término es el doble del anterior, empezando en 3</td><td>recursiva</td><td class="mono">a₁ = 3, aₙ = 2·aₙ₋₁, n ≥ 2</td><td class="mono">3, 6, 12, 24</td></tr>
+        </tbody></table></div>
+      <p class="note">También vale escribirlo como conjunto: { p + 1 : p es primo }. Pero la forma aₙ = … es mejor, porque con ella puede listar "hasta n = 15" directamente.</p>
+    </div>
+    <div class="card">
+      <h2>Práctica</h2>
+      <p class="muted">Lea la frase, escoja la fórmula y escriba los primeros 6 términos. <kbd>Enter</kbd> revisa y pasa a la siguiente.</p>
+      <div class="stats" id="sStats"></div>
+      <div id="sBody"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PARCIAL ===================== -->
+  <section id="tab-parcial" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Parcial simulado: punto 1</h2>
+      <p class="muted">Serie en palabras → fórmula → lista → insertar en AVL → eliminar 3 nodos (predecesor) → recorridos y medidas. Hágalo en papel y vaya digitando.</p>
+      <div class="toolbar">
+        <label for="pSerie">Serie<select id="pSerie"></select></label>
+        <label for="pN">Términos (n)<input id="pN" type="number" min="5" max="15" value="15" style="width:90px"></label>
+        <label for="pOrder">Orden de inserción<select id="pOrder"><option value="serie">El de la serie</option><option value="mix">Mezclado</option></select></label>
+        <button class="btn primary" data-act="pNew">Nuevo parcial</button>
+      </div>
+    </div>
+    <div id="pBody" class="stack"></div>
+  </section>
+
+  <!-- ===================== PYTHON ===================== -->
+  <section id="tab-python" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Python mínimo para árboles</h2>
+      <p class="muted">Solo lo que necesita para escribir un árbol en papel. Lo de la izquierda es lo que usted ya conoce de otros lenguajes.</p>
+      <div class="tscroll"><table class="t" id="syntaxTable"></table></div>
+      <div class="callout"><b>Lo que más se olvida:</b> los dos puntos <code>:</code> al final de <code>if</code>, <code>def</code>, <code>class</code>, <code>while</code>, <code>for</code>, <code>else</code>; y la sangría (4 espacios) que reemplaza las llaves <code>{ }</code>.</div>
+    </div>
+    <div class="card" id="pyFree">
+      <h2>Escribir desde cero</h2>
+      <p class="muted">Como en el parcial: hoja en blanco. Escríbalo primero en papel, luego aquí, y presione Revisar. La página revisa los errores típicos de sintaxis y los puntos clave, y le muestra la solución al lado. Lo que escriba se guarda en este navegador.</p>
+      <div class="toolbar">
+        <label for="fSel" style="flex:1 1 280px">Ejercicio<select id="fSel"></select></label>
+        <button class="btn" id="fNewVar" data-act="fNewVar" hidden>Otro enunciado</button>
+      </div>
+      <div id="fStatement" class="callout blue"></div>
+      <label for="fCode" class="lbl">Su código</label>
+      <textarea id="fCode" class="codearea" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="class Nodo:"></textarea>
+      <p class="note"><kbd>Tab</kbd> = 4 espacios · <kbd>Shift</kbd>+<kbd>Tab</kbd> quita sangría · <kbd>Enter</kbd> mantiene la sangría y agrega 4 después de ":".</p>
+      <div class="actions"><button class="btn primary" data-act="fCheck">Revisar y comparar</button><button class="btn ghost" data-act="fClear">Borrar</button></div>
+      <div id="fResult"></div>
+    </div>
+    <div class="card">
+      <h2>Ejercicios de completar</h2>
+      <p class="muted">Primero escriba la función completa en papel. Luego llene los espacios y presione Revisar. No importan los espacios en blanco.</p>
+    </div>
+    <div id="pyEx" class="stack"></div>
+    <div class="card">
+      <h2>Código completo de referencia</h2>
+      <p class="muted">El mismo archivo <code>arboles.py</code> que quedó en su carpeta. Se puede correr con <code>python arboles.py</code>.</p>
+      <pre class="code" id="fullPy"># ============================================================
+#  ARBOLES BST y AVL en Python (version para estudiar a mano)
+#
+#  Convenciones (las de su profe):
+#    - profundidad de la raiz = 0
+#    - altura de una hoja = 0, arbol vacio = -1
+#    - eliminar nodo con dos hijos -&gt; PREDECESOR
+#      (el mayor del subarbol izquierdo)
+#    - FB (factor de balance) = altura(izq) - altura(der)
+# ============================================================
+
+
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izq = None
+        self.der = None
+        self.altura = 0          # solo lo usa el AVL
+
+
+# ======================== BST ========================
+
+def insertar_bst(nodo, valor):
+    if nodo is None:
+        return Nodo(valor)
+    if valor &lt; nodo.valor:
+        nodo.izq = insertar_bst(nodo.izq, valor)
+    elif valor &gt; nodo.valor:
+        nodo.der = insertar_bst(nodo.der, valor)
+    return nodo
+
+
+def buscar(nodo, valor):
+    if nodo is None:
+        return False
+    if valor == nodo.valor:
+        return True
+    if valor &lt; nodo.valor:
+        return buscar(nodo.izq, valor)
+    return buscar(nodo.der, valor)
+
+
+def maximo(nodo):
+    # el predecesor de X es maximo(X.izq)
+    while nodo.der is not None:
+        nodo = nodo.der
+    return nodo
+
+
+def eliminar_bst(nodo, valor):
+    if nodo is None:
+        return None
+    if valor &lt; nodo.valor:
+        nodo.izq = eliminar_bst(nodo.izq, valor)
+    elif valor &gt; nodo.valor:
+        nodo.der = eliminar_bst(nodo.der, valor)
+    else:
+        # caso 1 y 2: hoja o un solo hijo
+        if nodo.izq is None:
+            return nodo.der
+        if nodo.der is None:
+            return nodo.izq
+        # caso 3: dos hijos -&gt; predecesor
+        pred = maximo(nodo.izq)
+        nodo.valor = pred.valor
+        nodo.izq = eliminar_bst(nodo.izq, pred.valor)
+    return nodo
+
+
+# ===================== RECORRIDOS =====================
+
+def inorden(nodo, res):
+    if nodo is not None:
+        inorden(nodo.izq, res)
+        res.append(nodo.valor)
+        inorden(nodo.der, res)
+
+
+def preorden(nodo, res):
+    if nodo is not None:
+        res.append(nodo.valor)
+        preorden(nodo.izq, res)
+        preorden(nodo.der, res)
+
+
+def postorden(nodo, res):
+    if nodo is not None:
+        postorden(nodo.izq, res)
+        postorden(nodo.der, res)
+        res.append(nodo.valor)
+
+
+def anchura(raiz):
+    # recorrido por niveles (BFS) usando una lista como cola
+    res = []
+    if raiz is None:
+        return res
+    cola = [raiz]
+    while len(cola) &gt; 0:
+        actual = cola.pop(0)
+        res.append(actual.valor)
+        if actual.izq is not None:
+            cola.append(actual.izq)
+        if actual.der is not None:
+            cola.append(actual.der)
+    return res
+
+
+def altura(nodo):
+    if nodo is None:
+        return -1
+    return 1 + max(altura(nodo.izq), altura(nodo.der))
+
+
+def profundidad(nodo, valor):
+    d = 0
+    while nodo is not None:
+        if valor == nodo.valor:
+            return d
+        if valor &lt; nodo.valor:
+            nodo = nodo.izq
+        else:
+            nodo = nodo.der
+        d += 1
+    return -1                    # no esta
+
+
+def contar_hojas(nodo):
+    if nodo is None:
+        return 0
+    if nodo.izq is None and nodo.der is None:
+        return 1
+    return contar_hojas(nodo.izq) + contar_hojas(nodo.der)
+
+
+# ======================== AVL ========================
+
+def h(nodo):
+    if nodo is None:
+        return -1
+    return nodo.altura
+
+
+def actualizar(nodo):
+    nodo.altura = 1 + max(h(nodo.izq), h(nodo.der))
+
+
+def fb(nodo):
+    return h(nodo.izq) - h(nodo.der)
+
+
+def rotar_derecha(y):
+    x = y.izq
+    t2 = x.der
+    x.der = y
+    y.izq = t2
+    actualizar(y)                # primero el que quedo abajo
+    actualizar(x)
+    return x                     # x es la nueva raiz del subarbol
+
+
+def rotar_izquierda(x):
+    y = x.der
+    t2 = y.izq
+    y.izq = x
+    x.der = t2
+    actualizar(x)
+    actualizar(y)
+    return y
+
+
+def balancear(nodo):
+    actualizar(nodo)
+    b = fb(nodo)
+    if b &gt; 1:                            # pesa a la izquierda
+        if fb(nodo.izq) &lt; 0:             # zig-zag: caso LR
+            nodo.izq = rotar_izquierda(nodo.izq)
+        return rotar_derecha(nodo)       # caso LL
+    if b &lt; -1:                           # pesa a la derecha
+        if fb(nodo.der) &gt; 0:             # zig-zag: caso RL
+            nodo.der = rotar_derecha(nodo.der)
+        return rotar_izquierda(nodo)     # caso RR
+    return nodo
+
+
+def insertar_avl(nodo, valor):
+    if nodo is None:
+        return Nodo(valor)
+    if valor &lt; nodo.valor:
+        nodo.izq = insertar_avl(nodo.izq, valor)
+    elif valor &gt; nodo.valor:
+        nodo.der = insertar_avl(nodo.der, valor)
+    else:
+        return nodo                      # repetido: no se inserta
+    return balancear(nodo)
+
+
+def eliminar_avl(nodo, valor):
+    if nodo is None:
+        return None
+    if valor &lt; nodo.valor:
+        nodo.izq = eliminar_avl(nodo.izq, valor)
+    elif valor &gt; nodo.valor:
+        nodo.der = eliminar_avl(nodo.der, valor)
+    else:
+        if nodo.izq is None:
+            return nodo.der
+        if nodo.der is None:
+            return nodo.izq
+        pred = maximo(nodo.izq)
+        nodo.valor = pred.valor
+        nodo.izq = eliminar_avl(nodo.izq, pred.valor)
+    return balancear(nodo)
+
+
+class ArbolAVL:
+    def __init__(self):
+        self.raiz = None
+
+    def insertar(self, valor):
+        self.raiz = insertar_avl(self.raiz, valor)
+
+    def eliminar(self, valor):
+        self.raiz = eliminar_avl(self.raiz, valor)
+
+
+# ============ NODOS CON TUPLAS Y PRIORIDAD ============
+# Python compara tuplas campo por campo, de izquierda a derecha:
+#   (3, 1, 20) &lt; (3, 2, 5)   -&gt; True  (empatan en 3, decide el 1 &lt; 2)
+# Entonces: ponga primero el campo MAS importante.
+# Si un campo es "mayor primero", pongale signo menos.
+
+class Evento:
+    def __init__(self, prioridad, magnitud, id):
+        self.prioridad = prioridad
+        self.magnitud = magnitud
+        self.id = id
+
+    def clave(self):
+        # 1. magnitud (mayor primero)  2. prioridad (menor primero)  3. id
+        return (-self.magnitud, self.prioridad, self.id)
+
+    def __lt__(self, otro):
+        # con esto "a &lt; b" funciona directo entre eventos
+        return self.clave() &lt; otro.clave()
+
+    def __repr__(self):
+        return f"#{self.id}(p={self.prioridad}, m={self.magnitud})"
+
+
+def insertar_evento(nodo, ev):
+    if nodo is None:
+        return Nodo(ev)
+    if ev.clave() &lt; nodo.valor.clave():
+        nodo.izq = insertar_evento(nodo.izq, ev)
+    else:                                # el id es unico: nunca empatan
+        nodo.der = insertar_evento(nodo.der, ev)
+    return nodo
+
+
+# ======================== DIBUJO ========================
+
+def imprimir(nodo, nivel=0):
+    # dibuja el arbol de lado: la raiz a la izquierda, la derecha arriba
+    if nodo is not None:
+        imprimir(nodo.der, nivel + 1)
+        print("      " * nivel + str(nodo.valor))
+        imprimir(nodo.izq, nivel + 1)
+
+
+# ======================== DEMO ========================
+
+def primos(n):
+    res = []
+    x = 2
+    while len(res) &lt; n:
+        es_primo = True
+        for d in range(2, x):
+            if x % d == 0:
+                es_primo = False
+        if es_primo:
+            res.append(x)
+        x += 1
+    return res
+
+
+if __name__ == "__main__":
+    serie = [p + 1 for p in primos(15)]      # "los primos mas 1"
+    print("Serie:", serie)
+
+    arbol = ArbolAVL()
+    for x in serie:
+        arbol.insertar(x)
+    imprimir(arbol.raiz)
+
+    for x in [20, 4, 32]:
+        arbol.eliminar(x)
+    print("\nDespues de eliminar 20, 4 y 32:")
+    imprimir(arbol.raiz)
+
+    r = []
+    inorden(arbol.raiz, r)
+    print("Inorden:  ", r)
+    r = []
+    preorden(arbol.raiz, r)
+    print("Preorden: ", r)
+    r = []
+    postorden(arbol.raiz, r)
+    print("Postorden:", r)
+    print("Anchura:  ", anchura(arbol.raiz))
+    print("Altura:   ", altura(arbol.raiz))
+    print("Profundidad de 44:", profundidad(arbol.raiz, 44))
+    print("Hojas:    ", contar_hojas(arbol.raiz))
+
+    print("\nEventos (magnitud mayor primero, luego prioridad, luego id):")
+    eventos = [Evento(1, 3, 25), Evento(2, 5, 11), Evento(1, 5, 40), Evento(3, 3, 7)]
+    raiz = None
+    for e in eventos:
+        raiz = insertar_evento(raiz, e)
+    r = []
+    inorden(raiz, r)
+    print(r)
+</pre>
+    </div>
+  </section>
+
+  <!-- ===================== TUPLAS ===================== -->
+  <section id="tab-tuplas" class="stack" role="tabpanel" hidden>
+    <div class="card">
+      <h2>Nodos con tuplas y prioridad</h2>
+      <p>Python compara tuplas <b>campo por campo, de izquierda a derecha</b>, y el primer campo distinto decide:</p>
+      <pre class="code">(3, 1, 20) &lt; (3, 2, 5)    <span class="cm"># True: empatan en 3, decide 1 &lt; 2 (el 20 y el 5 ni se miran)</span>
+(5, 9, 9)  &lt; (6, 0, 0)    <span class="cm"># True: decide el primero, 5 &lt; 6</span>
+(-5, 1) &lt; (-3, 1)         <span class="cm"># True: -5 &lt; -3</span></pre>
+      <ol class="recipe">
+        <li>Ponga en la tupla <b>primero el campo más importante</b>, luego el segundo, y al final el id (desempate).</li>
+        <li>Si en un campo "el mayor va primero", póngale <b>signo menos</b>: así el mayor se vuelve el más pequeño.</li>
+        <li>En el BST, "va primero" = más pequeño = <b>más a la izquierda</b> = sale primero en inorden.</li>
+        <li>Inserte comparando claves: <code>if ev.clave() &lt; nodo.valor.clave():</code> va a la izquierda.</li>
+      </ol>
+      <pre class="code"><span class="kw">class</span> Evento:
+    <span class="kw">def</span> __init__(self, prioridad, magnitud, id):
+        self.prioridad = prioridad
+        self.magnitud = magnitud
+        self.id = id
+
+    <span class="kw">def</span> clave(self):
+        <span class="cm"># 1° magnitud (mayor primero), 2° prioridad (menor primero), 3° id</span>
+        <span class="kw">return</span> (-self.magnitud, self.prioridad, self.id)</pre>
+    </div>
+    <div class="card">
+      <h3>Calentamiento: ¿a &lt; b?</h3>
+      <div id="tupQuiz"></div>
+      <div class="actions"><button class="btn" data-act="tqNew">Otras 6</button></div>
+    </div>
+    <div class="card" id="tupEx"></div>
+  </section>
+
+  <!-- ===================== 2-3 / RN ===================== -->
+  <section id="tab-otros" class="stack" role="tabpanel" hidden>
+    <div class="cols">
+      <div class="card">
+        <h2>Árbol 2-3</h2>
+        <ul>
+          <li>Cada nodo tiene <b>1 clave y 2 hijos</b> (nodo-2) o <b>2 claves y 3 hijos</b> (nodo-3).</li>
+          <li><b>Todas las hojas están en el mismo nivel.</b> Siempre está perfectamente balanceado.</li>
+          <li>Se inserta <b>siempre en una hoja</b> (bajando como en BST: menor que la 1ª clave → hijo izquierdo; entre las dos → hijo del medio; mayor → derecho).</li>
+          <li>Si la hoja queda con <b>3 claves</b>, se parte: la del <b>medio sube</b> al padre, la menor y la mayor quedan como dos nodos separados.</li>
+          <li>Si el padre también queda con 3, se parte igual (se repite hacia arriba).</li>
+          <li>Si se parte la raíz, la clave del medio es la nueva raíz: <b>el árbol crece hacia arriba</b>, no hacia abajo.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Rojo-Negro</h2>
+        <ol>
+          <li>Cada nodo es rojo o negro.</li>
+          <li>La raíz es negra.</li>
+          <li>Las hojas nulas (NIL) cuentan como negras.</li>
+          <li><b>Un rojo no puede tener hijos rojos.</b></li>
+          <li>Desde cualquier nodo, todos los caminos hasta un NIL tienen la <b>misma cantidad de negros</b>.</li>
+        </ol>
+        <h4>Insertar</h4>
+        <p>El nuevo entra <b>ROJO</b>. Si el padre es negro, listo. Si el padre es rojo, mire al <b>tío</b> (el hermano del padre):</p>
+        <ul>
+          <li><b>Tío rojo</b> → recolorear: padre y tío a negro, abuelo a rojo. Repita el análisis desde el abuelo.</li>
+          <li><b>Tío negro y zig-zag</b> → rote sobre el padre para dejarlo en línea recta (y siga al caso de abajo).</li>
+          <li><b>Tío negro y línea recta</b> → rote sobre el abuelo; el que sube queda negro y el abuelo rojo.</li>
+          <li>Al final, la raíz siempre se pinta negra.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Visualizador paso a paso</h2>
+      <p class="muted">Escriba una secuencia, haga cada inserción en papel y luego compare.</p>
+      <div class="toolbar">
+        <label for="vType">Tipo<select id="vType"><option value="23">Árbol 2-3</option><option value="rb">Rojo-Negro</option><option value="avl">AVL (para comparar)</option></select></label>
+        <label for="vSeq" style="flex:1 1 240px">Secuencia<input id="vSeq" class="mono wide" value="10, 20, 30, 15, 25, 5, 1, 12"></label>
+        <button class="btn" data-act="vLoad">Cargar</button>
+        <button class="btn ghost" data-act="vRand">Al azar</button>
+        <label class="row" style="flex-direction:row;align-items:center"><input type="checkbox" id="vHide" checked> Ocultar resultado hasta que lo pida</label>
+      </div>
+      <div id="vBody"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/*CORE-START*/
+const numCmp=(a,b)=>a-b;
+const tupCmp=(a,b)=>{for(let i=0;i<a.length;i++){if(a[i]!==b[i])return a[i]<b[i]?-1:1;}return 0;};
+function mk(k){return {k,l:null,r:null,h:0};}
+function H(n){return n?n.h:-1;}
+function upd(n){n.h=1+Math.max(H(n.l),H(n.r));}
+function BF(n){return H(n.l)-H(n.r);}
+function clone(n){return n?{k:n.k,l:clone(n.l),r:clone(n.r),h:n.h}:null;}
+function fixH(n){if(!n)return -1;n.h=1+Math.max(fixH(n.l),fixH(n.r));return n.h;}
+function rotR(y){const x=y.l;y.l=x.r;x.r=y;upd(y);upd(x);return x;}
+function rotL(x){const y=x.r;x.r=y.l;y.l=x;upd(x);upd(y);return y;}
+function rebalance(n,log){
+  upd(n);
+  const b=BF(n);
+  if(b>1){
+    const c=n.l,bc=BF(c);
+    if(bc>=0){log.push({t:'rot',cs:'LL',p:n.k,c:c.k,b,bc});return rotR(n);}
+    log.push({t:'rot',cs:'LR',p:n.k,c:c.k,g:c.r.k,b,bc});
+    n.l=rotL(c);return rotR(n);
+  }
+  if(b<-1){
+    const c=n.r,bc=BF(c);
+    if(bc<=0){log.push({t:'rot',cs:'RR',p:n.k,c:c.k,b,bc});return rotL(n);}
+    log.push({t:'rot',cs:'RL',p:n.k,c:c.k,g:c.l.k,b,bc});
+    n.r=rotR(c);return rotL(n);
+  }
+  return n;
+}
+function avlIns(n,k,cmp,log){
+  if(!n){log.push({t:'new',k});return mk(k);}
+  const c=cmp(k,n.k);
+  if(c<0)n.l=avlIns(n.l,k,cmp,log);
+  else if(c>0)n.r=avlIns(n.r,k,cmp,log);
+  else{log.push({t:'dup',k});return n;}
+  return rebalance(n,log);
+}
+function avlDel(n,k,cmp,log,viaPred){
+  if(!n){log.push({t:'nf',k});return null;}
+  const c=cmp(k,n.k);
+  if(c<0)n.l=avlDel(n.l,k,cmp,log,viaPred);
+  else if(c>0)n.r=avlDel(n.r,k,cmp,log,viaPred);
+  else{
+    if(!n.l||!n.r){
+      const ch=n.l||n.r;
+      log.push({t:'rm',k:n.k,ch:ch?ch.k:null,viaPred:!!viaPred});
+      return ch;
+    }
+    let p=n.l;while(p.r)p=p.r;
+    log.push({t:'pred',k:n.k,pred:p.k});
+    n.k=p.k;
+    n.l=avlDel(n.l,p.k,cmp,log,true);
+  }
+  return rebalance(n,log);
+}
+function bstIns(n,k,cmp){if(!n)return mk(k);const c=cmp(k,n.k);if(c<0)n.l=bstIns(n.l,k,cmp);else if(c>0)n.r=bstIns(n.r,k,cmp);return n;}
+function bstDel(n,k,cmp){
+  if(!n)return null;const c=cmp(k,n.k);
+  if(c<0)n.l=bstDel(n.l,k,cmp);else if(c>0)n.r=bstDel(n.r,k,cmp);
+  else{if(!n.l)return n.r;if(!n.r)return n.l;let p=n.l;while(p.r)p=p.r;n.k=p.k;n.l=bstDel(n.l,p.k,cmp);}
+  return n;
+}
+function buildAVL(keys,cmp){let t=null;for(const k of keys)t=avlIns(t,k,cmp,[]);return t;}
+function buildBST(keys,cmp){let t=null;for(const k of keys)t=bstIns(t,k,cmp);fixH(t);return t;}
+function pre(n,a=[]){if(n){a.push(n.k);pre(n.l,a);pre(n.r,a);}return a;}
+function ino(n,a=[]){if(n){ino(n.l,a);a.push(n.k);ino(n.r,a);}return a;}
+function post(n,a=[]){if(n){post(n.l,a);post(n.r,a);a.push(n.k);}return a;}
+function bfs(n){const a=[];if(!n)return a;const q=[n];while(q.length){const x=q.shift();a.push(x.k);if(x.l)q.push(x.l);if(x.r)q.push(x.r);}return a;}
+function levels(n){const L=[];(function w(x,d){if(!x)return;(L[d]=L[d]||[]).push(x.k);w(x.l,d+1);w(x.r,d+1);})(n,0);return L;}
+function heightOf(n){return n?1+Math.max(heightOf(n.l),heightOf(n.r)):-1;}
+function depthOf(n,k,cmp){let d=0;while(n){const c=cmp(k,n.k);if(c===0)return d;n=c<0?n.l:n.r;d++;}return -1;}
+function leavesOf(n,a=[]){if(!n)return a;if(!n.l&&!n.r)a.push(n.k);leavesOf(n.l,a);leavesOf(n.r,a);return a;}
+function countOf(n){return n?1+countOf(n.l)+countOf(n.r):0;}
+function findNode(n,k,cmp){while(n){const c=cmp(k,n.k);if(c===0)return n;n=c<0?n.l:n.r;}return null;}
+function stepInsert(tree,k,cmp){
+  const raw=bstIns(clone(tree),k,cmp);fixH(raw);
+  const log=[];const after=avlIns(clone(tree),k,cmp,log);
+  return {k,before:clone(tree),raw,after,log,rot:log.find(e=>e.t==='rot')||null};
+}
+function stepDelete(tree,k,cmp){
+  const raw=bstDel(clone(tree),k,cmp);fixH(raw);
+  const log=[];const after=avlDel(clone(tree),k,cmp,log);
+  return {k,before:clone(tree),raw,after,log,rots:log.filter(e=>e.t==='rot')};
+}
+/* ---- 2-3 ---- */
+function ins23(n,k,log){
+  if(n.keys.includes(k)){log.push(`${k} ya está; no se inserta.`);return null;}
+  if(!n.kids.length){
+    log.push(`Se baja hasta la hoja [${n.keys.join(', ')}] y se mete el ${k}.`);
+    n.keys.push(k);n.keys.sort((a,b)=>a-b);
+  }else{
+    let i=0;while(i<n.keys.length&&k>n.keys[i])i++;
+    const s=ins23(n.kids[i],k,log);
+    if(s){n.keys.splice(i,0,s.mid);n.kids.splice(i,1,s.left,s.right);}
+  }
+  if(n.keys.length===3){
+    const [a,b,c]=n.keys;
+    log.push(`El nodo quedó con 3 claves [${a}, ${b}, ${c}] → se parte: el ${b} sube; quedan [${a}] y [${c}].`);
+    return {mid:b,left:{keys:[a],kids:n.kids.slice(0,2)},right:{keys:[c],kids:n.kids.slice(2)}};
+  }
+  return null;
+}
+function ins23root(root,k,log){
+  if(!root){log.push(`Árbol vacío: ${k} es la raíz.`);return {keys:[k],kids:[]};}
+  const s=ins23(root,k,log);
+  if(s){log.push(`Se partió la raíz → ${s.mid} es la nueva raíz (el árbol creció un nivel hacia arriba).`);return {keys:[s.mid],kids:[s.left,s.right]};}
+  return root;
+}
+function clone23(n){return n?{keys:n.keys.slice(),kids:n.kids.map(clone23)}:null;}
+/* ---- Rojo-Negro ---- */
+function rbRotL(T,x){const y=x.r;x.r=y.l;if(y.l)y.l.p=x;y.p=x.p;if(!x.p)T.root=y;else if(x===x.p.l)x.p.l=y;else x.p.r=y;y.l=x;x.p=y;}
+function rbRotR(T,x){const y=x.l;x.l=y.r;if(y.r)y.r.p=x;y.p=x.p;if(!x.p)T.root=y;else if(x===x.p.r)x.p.r=y;else x.p.l=y;y.r=x;x.p=y;}
+function rbInsert(T,k,log){
+  let y=null,x=T.root;
+  while(x){y=x;if(k<x.k)x=x.l;else if(k>x.k)x=x.r;else{log.push(`${k} ya está; no se inserta.`);return;}}
+  let z={k,l:null,r:null,p:y,c:'R'};
+  if(!y)T.root=z;else if(k<y.k)y.l=z;else y.r=z;
+  log.push(`Se inserta ${k} como en un BST y entra ROJO.`);
+  if(y&&y.c==='B')log.push(`El padre ${y.k} es negro → no hay dos rojos seguidos. Listo.`);
+  while(z.p&&z.p.c==='R'){
+    const p=z.p,g=p.p;
+    if(p===g.l){
+      const u=g.r;
+      if(u&&u.c==='R'){p.c='B';u.c='B';g.c='R';log.push(`Padre ${p.k} y tío ${u.k} son rojos → recolorear: ${p.k} y ${u.k} a negro, el abuelo ${g.k} a rojo. Se revisa de nuevo desde ${g.k}.`);z=g;}
+      else{
+        if(z===p.r){log.push(`Padre ${p.k} rojo, tío ${u?u.k:'NIL'} negro, y ${z.k} forma zig-zag → rotación izquierda sobre el padre ${p.k} para dejarlo en línea recta.`);z=p;rbRotL(T,z);}
+        const P=z.p,G=P.p;
+        log.push(`Padre ${P.k} rojo, tío negro, en línea recta → rotación derecha sobre el abuelo ${G.k}; ${P.k} queda negro y ${G.k} rojo.`);
+        P.c='B';G.c='R';rbRotR(T,G);
+      }
+    }else{
+      const u=g.l;
+      if(u&&u.c==='R'){p.c='B';u.c='B';g.c='R';log.push(`Padre ${p.k} y tío ${u.k} son rojos → recolorear: ${p.k} y ${u.k} a negro, el abuelo ${g.k} a rojo. Se revisa de nuevo desde ${g.k}.`);z=g;}
+      else{
+        if(z===p.l){log.push(`Padre ${p.k} rojo, tío ${u?u.k:'NIL'} negro, y ${z.k} forma zig-zag → rotación derecha sobre el padre ${p.k} para dejarlo en línea recta.`);z=p;rbRotR(T,z);}
+        const P=z.p,G=P.p;
+        log.push(`Padre ${P.k} rojo, tío negro, en línea recta → rotación izquierda sobre el abuelo ${G.k}; ${P.k} queda negro y ${G.k} rojo.`);
+        P.c='B';G.c='R';rbRotL(T,G);
+      }
+    }
+  }
+  if(T.root.c==='R'){T.root.c='B';log.push(`La raíz ${T.root.k} tiene que ser negra → se pinta negra.`);}
+}
+function rbSnap(n){return n?{k:n.k,c:n.c,l:rbSnap(n.l),r:rbSnap(n.r),h:0}:null;}
+/* ---- utilidades para el árbol interactivo ---- */
+function rotAt(n,k,dir){
+  if(!n)return n;
+  if(k===n.k){if(dir==='R'&&n.l)return rotR(n);if(dir==='L'&&n.r)return rotL(n);return n;}
+  if(k<n.k)n.l=rotAt(n.l,k,dir);else n.r=rotAt(n.r,k,dir);
+  upd(n);return n;
+}
+function parentOf(t,k){let p=null,n=t;while(n&&n.k!==k){p=n;n=k<n.k?n.l:n.r;}return n?p:undefined;}
+function badNodes(t){fixH(t);const a=[];(function w(n){if(!n)return;if(Math.abs(BF(n))>1)a.push(n.k);w(n.l);w(n.r);})(t);return a;}
+function bstSpot(t,k){const path=[];let n=t,par=null,side=null;while(n){const dir=k<n.k?'l':'r';path.push({k:n.k,dir});par=n.k;side=dir;n=n[dir];}return {par,side,path};}
+function predOf(t,k){const n=findNode(t,k,numCmp);if(!n||!n.l||!n.r)return null;let p=n.l;while(p.r)p=p.r;return p.k;}
+function opsFromLog(log){
+  const ops=[];
+  for(const e of log){
+    if(e.t!=='rot')continue;
+    if(e.cs==='LL')ops.push({at:e.p,dir:'R'});
+    else if(e.cs==='RR')ops.push({at:e.p,dir:'L'});
+    else if(e.cs==='LR')ops.push({at:e.c,dir:'L'},{at:e.p,dir:'R'});
+    else ops.push({at:e.c,dir:'R'},{at:e.p,dir:'L'});
+  }
+  return ops;
+}
+/*CORE-END*/
+
+/* ===================== utilidades de UI ===================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sgn=b=>b>0?'+'+b:String(b);
+const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const ACT={};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const f=ACT[b.dataset.act];if(f){e.preventDefault();f(b);}});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;const el=e.target.closest('[data-enter]');if(!el)return;
+  const f=ACT[el.dataset.enter];if(f){e.preventDefault();f(el);}
+});
+
+function parseList(s){
+  const parts=String(s).trim().split(/[\s,;]+/).filter(Boolean);
+  const nums=parts.map(Number);
+  if(nums.some(x=>Number.isNaN(x)))return null;
+  return nums;
+}
+function sameList(a,b){return a&&a.length===b.length&&a.every((x,i)=>x===b[i]);}
+function sameSet(a,b){return a&&a.length===b.length&&[...a].sort((x,y)=>x-y).every((x,i)=>x===[...b].sort((p,q)=>p-q)[i]);}
+function listDiff(user,correct){
+  if(!user)return 'No pude leer la lista: use solo números separados por coma.';
+  if(user.length!==correct.length)return `Tiene ${user.length} elementos y deberían ser ${correct.length}.`;
+  const i=user.findIndex((x,j)=>x!==correct[j]);
+  return i<0?'':`El primer error está en la posición ${i+1}: puso ${user[i]} y era ${correct[i]}.`;
+}
+
+/* ===================== dibujo ===================== */
+function drawBin(root,o={}){
+  if(!root)return '<p class="muted small">(árbol vacío)</p>';
+  const lab=o.label||(k=>String(k)),cls=o.cls||(()=>''),sub=o.sub;
+  const items=[];let i=0;
+  (function w(n,d){if(!n)return;w(n.l,d+1);items.push({n,x:i++,d});w(n.r,d+1);})(root,0);
+  const pos=new Map(items.map(t=>[t.n,t]));
+  const wOf=n=>Math.max(34,lab(n.k).length*8.6+16);
+  const colW=Math.max(...items.map(t=>wOf(t.n)))+(o.bf?14:10);
+  const rowH=sub?76:60;
+  const maxD=Math.max(...items.map(t=>t.d));
+  const W=items.length*colW+24,HH=(maxD+1)*rowH+(sub?24:8)+14;
+  const cx=t=>12+t.x*colW+colW/2,cy=t=>28+t.d*rowH;
+  let edges='',nodes='';
+  for(const t of items)for(const ch of [t.n.l,t.n.r])if(ch){const c=pos.get(ch);edges+=`<line x1="${cx(t)}" y1="${cy(t)}" x2="${cx(c)}" y2="${cy(c)}"/>`;}
+  for(const t of items){
+    const L=lab(t.n.k),w=wOf(t.n),x=cx(t),y=cy(t);
+    nodes+=`<g class="nd ${cls(t.n)}"><rect x="${x-w/2}" y="${y-15}" width="${w}" height="30" rx="15"/><text x="${x}" y="${y+5}">${esc(L)}</text>`;
+    if(o.bf){const b=BF(t.n);nodes+=`<text class="bf${Math.abs(b)>1?' bfbad':''}" x="${x+w/2-4}" y="${y-17}">${sgn(b)}</text>`;}
+    if(sub)nodes+=`<text class="sub" x="${x}" y="${y+31}">${esc(sub(t.n))}</text>`;
+    nodes+='</g>';
+  }
+  return `<div class="treebox"><svg viewBox="0 0 ${W} ${HH}" width="${W}" height="${HH}" role="img" aria-label="Dibujo del árbol"><g class="edges">${edges}</g>${nodes}</svg></div>`;
+}
+function draw23(root){
+  if(!root)return '<p class="muted small">(árbol vacío)</p>';
+  const KW=34,gap=16,rowH=70,pos=new Map();let cursor=12,maxD=0;
+  const wOf=n=>n.keys.length*KW+6;
+  (function lay(n,d){
+    maxD=Math.max(maxD,d);
+    if(!n.kids.length){const w=wOf(n);pos.set(n,{x:cursor+w/2,d,w});cursor+=w+gap;return;}
+    n.kids.forEach(c=>lay(c,d+1));
+    const xs=n.kids.map(c=>pos.get(c).x);
+    pos.set(n,{x:(xs[0]+xs[xs.length-1])/2,d,w:wOf(n)});
+  })(root,0);
+  const W=Math.max(cursor+12-gap,80),HH=(maxD+1)*rowH+10;
+  let edges='',nodes='';
+  for(const [n,p] of pos){
+    const y=24+p.d*rowH,x0=p.x-p.w/2;
+    n.kids.forEach((c,i)=>{const q=pos.get(c);const sx=x0+3+(i/(n.kids.length-1))*(p.w-6);edges+=`<line x1="${sx}" y1="${y+14}" x2="${q.x}" y2="${24+q.d*rowH-14}"/>`;});
+    let s=`<g class="n23"><rect x="${x0}" y="${y-14}" width="${p.w}" height="28" rx="6"/>`;
+    n.keys.forEach((k,i)=>{s+=`<text x="${x0+3+KW/2+i*KW}" y="${y+5}">${k}</text>`;if(i>0)s+=`<line x1="${x0+3+i*KW}" y1="${y-14}" x2="${x0+3+i*KW}" y2="${y+14}"/>`;});
+    nodes+=s+'</g>';
+  }
+  return `<div class="treebox"><svg viewBox="0 0 ${W} ${HH}" width="${W}" height="${HH}" role="img" aria-label="Árbol 2-3"><g class="edges">${edges}</g>${nodes}</svg></div>`;
+}
+function fig(caption,html){return `<figure><figcaption>${caption}</figcaption>${html}</figure>`;}
+
+/* ===================== explicaciones ===================== */
+const CASE_TXT={LL:'LL · rotación simple a la derecha',RR:'RR · rotación simple a la izquierda',LR:'LR · doble: izquierda y luego derecha',RL:'RL · doble: derecha y luego izquierda',none:'Ninguna rotación'};
+function rotText(e,L){
+  const head=`<b>${L(e.p)}</b> queda con FB ${sgn(e.b)} (pesa a la ${e.b>0?'izquierda':'derecha'}) → es el pivote.`;
+  if(e.cs==='LL')return `${head} Su hijo izquierdo ${L(e.c)} tiene FB ${sgn(e.bc)} → ${e.bc===0?'FB 0 se toma como línea recta':'mismo lado: línea recta'} → <b>caso LL</b>: rotación simple a la derecha sobre ${L(e.p)}. Sube ${L(e.c)}.`;
+  if(e.cs==='RR')return `${head} Su hijo derecho ${L(e.c)} tiene FB ${sgn(e.bc)} → ${e.bc===0?'FB 0 se toma como línea recta':'mismo lado: línea recta'} → <b>caso RR</b>: rotación simple a la izquierda sobre ${L(e.p)}. Sube ${L(e.c)}.`;
+  if(e.cs==='LR')return `${head} Su hijo izquierdo ${L(e.c)} tiene FB ${sgn(e.bc)} (pesa al otro lado) → zig-zag → <b>caso LR</b>: rotación izquierda sobre ${L(e.c)} y luego derecha sobre ${L(e.p)}. Sube el nieto ${L(e.g)} (el del medio entre ${L(e.c)}, ${L(e.g)} y ${L(e.p)}).`;
+  return `${head} Su hijo derecho ${L(e.c)} tiene FB ${sgn(e.bc)} (pesa al otro lado) → zig-zag → <b>caso RL</b>: rotación derecha sobre ${L(e.c)} y luego izquierda sobre ${L(e.p)}. Sube el nieto ${L(e.g)} (el del medio entre ${L(e.p)}, ${L(e.g)} y ${L(e.c)}).`;
+}
+function explainLog(log,L=String){
+  const out=[];
+  for(const e of log){
+    if(e.t==='new')out.push(`Se inserta ${L(e.k)} como hoja (bajando como en BST).`);
+    else if(e.t==='dup')out.push(`${L(e.k)} ya estaba: no se inserta de nuevo.`);
+    else if(e.t==='nf')out.push(`${L(e.k)} no está en el árbol.`);
+    else if(e.t==='pred')out.push(`${L(e.k)} tiene dos hijos → se reemplaza por su <b>predecesor ${L(e.pred)}</b> (un paso a la izquierda y luego todo a la derecha).`);
+    else if(e.t==='rm'){
+      if(e.viaPred)out.push(`Se quita el ${L(e.k)} de su posición original${e.ch!==null?`; su hijo ${L(e.ch)} sube a ese lugar.`:' (allí era hoja).'}`);
+      else out.push(e.ch!==null?`${L(e.k)} tiene un solo hijo (${L(e.ch)}) → ese hijo ocupa su lugar.`:`${L(e.k)} es hoja → se quita directamente.`);
+    }
+    else if(e.t==='rot')out.push(rotText(e,L));
+  }
+  if(!log.some(e=>e.t==='rot')&&!log.some(e=>e.t==='dup'||e.t==='nf'))out.push('Subiendo hasta la raíz, todos los FB quedan en −1, 0 o +1 → <b>no hace falta rotar</b>.');
+  return `<ol class="steps">${out.map(x=>`<li>${x}</li>`).join('')}</ol>`;
+}
+function rotChoice(name){
+  return `<div class="choices" role="radiogroup" aria-label="Rotación">${['none','LL','RR','LR','RL'].map(v=>`<label class="choice"><input type="radio" name="${name}" value="${v}">${v==='none'?'Ninguna':`<b>${v}</b> ${CASE_TXT[v].split('· ')[1]}`}</label>`).join('')}</div>`;
+}
+const chosen=name=>{const el=$(`input[name="${name}"]:checked`);return el?el.value:null;};
+function insFigs(st,L=String){
+  const pk=st.rot?st.rot.p:null;
+  let h=fig(st.rot?'1. Recién insertado como BST (FB en rojo = desbalance)':'Después de insertar',drawBin(st.rot?st.raw:st.after,{bf:true,label:L,cls:n=>n.k===st.k?'new':(n.k===pk?'piv':'')}));
+  if(st.rot){const r=st.rot;const moved=new Set([r.p,r.c,r.g]);h+=fig('2. Después de rotar',drawBin(st.after,{bf:true,label:L,cls:n=>moved.has(n.k)?'rot':(n.k===st.k?'new':'')}));}
+  return `<div class="trees">${h}</div>`;
+}
+function delFigs(st,L=String){
+  const piv=st.rots.length?st.rots[0].p:null;
+  let h=fig('Árbol antes',drawBin(st.before,{bf:true,label:L,cls:n=>n.k===st.k?'gone':''}));
+  if(st.rots.length)h+=fig('Recién eliminado, sin balancear',drawBin(st.raw,{bf:true,label:L,cls:n=>n.k===piv?'piv':''}));
+  const moved=new Set(st.rots.flatMap(r=>[r.p,r.c,r.g]));
+  h+=fig(st.rots.length?'Después de balancear':'Después de eliminar (ya está balanceado)',drawBin(st.after,{bf:true,label:L,cls:n=>moved.has(n.k)?'rot':''}));
+  return `<div class="trees">${h}</div>`;
+}
+
+/* ===================== pestañas ===================== */
+function showTab(id){
+  $$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));
+  $$('section[role=tabpanel]').forEach(s=>s.hidden=s.id!=='tab-'+id);
+  store.set('tab',id);
+}
+$$('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.tab);window.scrollTo({top:0});}));
+
+/* ===================== GUÍA ===================== */
+(function guia(){
+  const sample=[50,30,70,20,40,60,80,35,10];
+  const t=buildBST(sample,numCmp);
+  const L=levels(t);
+  const rows=[
+    ['Profundidad de un nodo','Cuántas aristas hay desde la raíz hasta él. La raíz tiene 0.',`profundidad(35) = ${depthOf(t,35,numCmp)}`],
+    ['Nivel','Todos los nodos con la misma profundidad. Nivel 0 = la raíz.',`nivel 2 = ${L[2].join(', ')}`],
+    ['Altura de un nodo','Aristas del camino más largo desde él hasta una hoja. Hoja = 0.',`altura(30) = ${heightOf(findNode(t,30,numCmp))}`],
+    ['Altura del árbol','Altura de la raíz = profundidad máxima.',`${heightOf(t)}`],
+    ['Recorrido en anchura (BFS)','Nivel por nivel, de izquierda a derecha. Se hace con una cola.',bfs(t).join(', ')],
+    ['Anchura máxima','La mayor cantidad de nodos en un mismo nivel.',`${Math.max(...L.map(x=>x.length))} (nivel ${L.findIndex(x=>x.length===Math.max(...L.map(y=>y.length)))})`],
+    ['Inorden','izquierda · raíz · derecha. En un BST sale ordenado.',ino(t).join(', ')],
+    ['Preorden','raíz · izquierda · derecha. Identifica el árbol completo.',pre(t).join(', ')],
+    ['Postorden','izquierda · derecha · raíz. La raíz sale de última.',post(t).join(', ')],
+    ['Hojas','Nodos sin hijos.',leavesOf(t).join(', ')],
+    ['Nodos internos','Nodos con al menos un hijo.',`${countOf(t)-leavesOf(t).length}`],
+  ];
+  $('#medidasBody').innerHTML=rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="mono">${r[2]}</td></tr>`).join('');
+  $('#medidasTree').innerHTML=`<div class="trees">${fig('Árbol de ejemplo (BST): 50, 30, 70, 20, 40, 60, 80, 35, 10',drawBin(t,{}))}</div>`;
+  // trinodo (caso LR con subárboles T1..T4)
+  const T=s=>({k:s,l:null,r:null,h:0});
+  const before={k:'c=30',l:{k:'a=10',l:T('T1'),r:{k:'b=20',l:T('T2'),r:T('T3')}},r:T('T4')};
+  const after={k:'b=20',l:{k:'a=10',l:T('T1'),r:T('T2')},r:{k:'c=30',l:T('T3'),r:T('T4')}};
+  const tc=n=>/^T/.test(n.k)?'T':(n.k.startsWith('b')?'rot':'');
+  $('#trinode').innerHTML=`<div class="trees">${fig('Antes (caso LR): pivote c, hijo a, nieto b',drawBin(before,{cls:tc}))}${fig('Después: b arriba, T1 T2 T3 T4 en orden',drawBin(after,{cls:tc}))}</div>`;
+  const ex={LL:[30,20,10],RR:[10,20,30],LR:[30,10,20],RL:[10,30,20]};
+  $('#casos4').innerHTML=Object.entries(ex).map(([cs,seq])=>{
+    const st=stepInsert(buildAVL(seq.slice(0,2),numCmp),seq[2],numCmp);
+    return `<div><h4>${CASE_TXT[cs]}</h4><p class="small muted">Insertar ${seq.join(', ')}</p>${insFigs(st)}</div>`;
+  }).join('');
+})();
+
+/* ===================== DRILL ===================== */
+const D={mode:'ins',hands:true,q:null,answered:false,streak:0,best:0,ok:0,tot:0};
+function randTree(nmin,nmax){const n=rnd(nmin,nmax);const ks=new Set();while(ks.size<n)ks.add(rnd(1,99));const keys=[...ks];return {keys,tree:buildAVL(keys,numCmp)};}
+function genIns(){
+  const target=pick(['LL','RR','LR','RL','LL','RR','LR','RL','none']);
+  for(let t=0;t<600;t++){
+    const {keys,tree}=randTree(3,9);
+    for(let c=0;c<15;c++){const x=rnd(1,99);if(keys.includes(x))continue;const st=stepInsert(tree,x,numCmp);if((st.rot?st.rot.cs:'none')===target)return {tree,k:x,st};}
+  }
+  const {tree}=randTree(4,8);let x;do{x=rnd(1,99);}while(findNode(tree,x,numCmp));return {tree,k:x,st:stepInsert(tree,x,numCmp)};
+}
+function genDel(){
+  const wantRot=Math.random()<0.75;
+  for(let t=0;t<600;t++){
+    const {keys,tree}=randTree(6,12);
+    for(const k of shuffle(keys)){const st=stepDelete(tree,k,numCmp);if((st.rots.length>0)===wantRot)return {tree,k,st};}
+  }
+  const {keys,tree}=randTree(6,12);const k=pick(keys);return {tree,k,st:stepDelete(tree,k,numCmp)};
+}
+function dStats(){$('#dStats').innerHTML=`Racha <b>${D.streak}</b> · mejor <b>${D.best}</b> · aciertos <b>${D.ok}/${D.tot}</b>`;}
+function dNew(){
+  D.q=D.mode==='ins'?genIns():genDel();D.answered=false;
+  if(D.hands){dHandsRender();dStats();return;}
+  const q=D.q,showBF=$('#dShowBF').checked;
+  const isIns=D.mode==='ins';
+  $('#dBody').innerHTML=`
+    <div class="trees">${fig('Árbol AVL actual',drawBin(q.tree,{bf:showBF,cls:n=>!isIns&&n.k===q.k?'gone':''}))}</div>
+    <p class="statement">${isIns?`Insertar <b>${q.k}</b>`:`Eliminar <b>${q.k}</b> (con predecesor)`}</p>
+    <div class="lbl">${isIns?'¿Qué rotación hace falta?':'¿Cuál es la primera rotación que ocurre?'}</div>
+    ${rotChoice('dRot')}
+    <div class="row">
+      <div class="field" style="flex:0 1 200px"><label for="dPiv">Nodo pivote (si hay rotación)</label><input id="dPiv" type="number" data-enter="dCheck"></div>
+      <div class="field" style="flex:1 1 260px"><label for="dPre">Preorden del árbol final ${isIns?'(opcional)':''}</label><input id="dPre" class="mono" data-enter="dCheck" placeholder="ej: 40, 20, 10, 30, 60"></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="dGo" data-act="dCheck">Revisar</button><button class="btn ghost" data-act="dSkip">Otro</button></div>
+    <div id="dFb"></div>`;
+  dStats();
+}
+ACT.dMode=b=>{D.mode=b.dataset.m;$('#dIns').setAttribute('aria-pressed',String(D.mode==='ins'));$('#dDel').setAttribute('aria-pressed',String(D.mode==='del'));dNew();};
+ACT.dSkip=()=>dNew();
+ACT.dHands=b=>{D.hands=b.dataset.h==='1';$('#dHand').setAttribute('aria-pressed',String(D.hands));$('#dAns').setAttribute('aria-pressed',String(!D.hands));dNew();};
+ACT.dCheck=()=>{
+  if(D.answered){dNew();setTimeout(()=>$('input[name="dRot"]')?.focus(),0);return;}
+  const q=D.q,st=q.st,isIns=D.mode==='ins';
+  const ch=chosen('dRot');
+  if(!ch){$('#dFb').innerHTML='<div class="fb bad">Elija una opción de rotación.</div>';return;}
+  const r=isIns?st.rot:st.rots[0];
+  const correctCase=r?r.cs:'none';
+  const okCase=ch===correctCase;
+  const pivTxt=$('#dPiv').value.trim();
+  const okPiv=!r||Number(pivTxt)===r.p;
+  const preUser=$('#dPre').value.trim();
+  const correctPre=pre(st.after);
+  let okPre=true,preMsg='';
+  if(preUser||!isIns){const u=parseList(preUser);okPre=sameList(u,correctPre);if(!okPre)preMsg=listDiff(u,correctPre);}
+  const ok=okCase&&okPiv&&okPre;
+  D.tot++;if(ok){D.ok++;D.streak++;D.best=Math.max(D.best,D.streak);}else D.streak=0;
+  D.answered=true;
+  const bits=[];
+  if(!okCase)bits.push(`Rotación: era <b>${CASE_TXT[correctCase]}</b>.`);
+  if(okCase&&!okPiv)bits.push(`El caso está bien, pero el pivote era <b>${r.p}</b>.`);
+  if(!okPre)bits.push(`Preorden: ${preMsg} Correcto: <span class="mono">${correctPre.join(', ')}</span>`);
+  if(!isIns&&st.rots.length>1)bits.push(`Ojo: aquí hubo <b>${st.rots.length} rotaciones</b> (ver pasos).`);
+  $('#dFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><div class="verdict">${ok?'¡Correcto!':'Todavía no'}</div>${bits.map(b=>`<p>${b}</p>`).join('')}${explainLog(st.log)}${isIns?insFigs(st):delFigs(st)}<p class="note">Preorden final: <span class="mono">${correctPre.join(', ')}</span></p></div>`;
+  $('#dGo').textContent='Siguiente →';
+  dStats();
+};
+$('#dShowBF').addEventListener('change',()=>{if(D.hands){if(HD.lab){HD.lab.showBF=$('#dShowBF').checked;HD.lab.render(false);$('[data-lab=bf]',$('#hLab')).checked=HD.lab.showBF;}return;}if(D.q&&!D.answered){const q=D.q;$('#dBody .trees').innerHTML=fig('Árbol AVL actual',drawBin(q.tree,{bf:$('#dShowBF').checked,cls:n=>D.mode==='del'&&n.k===q.k?'gone':''}));}});
+
+/* ===================== ÁRBOL INTERACTIVO ===================== */
+const SVGNS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs={}){const e=document.createElementNS(SVGNS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e;}
+const reduceMotion=()=>!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+function spotText(k,sp){
+  if(sp.par===null)return `El árbol está vacío: el ${k} es la raíz.`;
+  return sp.path.map(p=>`${k} ${p.dir==='l'?'&lt;':'&gt;'} ${p.k} → ${p.dir==='l'?'izquierda':'derecha'}`).join(' · ')+`. Va como hijo <b>${sp.side==='l'?'izquierdo':'derecho'} del ${sp.par}</b>.`;
+}
+class TreeLab{
+  constructor(host,o={}){
+    this.o=o;this.tree=null;this.cur=new Map();this.M=new Map();this.sel=null;this.hl={};
+    this.showBF=!!o.showBF;this.mode='rotate';this.hist=[];this.rots=0;this.anim=null;this.timers=[];this.drag=null;
+    host.innerHTML=`<div class="lab m-rotate"><div class="labbar">
+      <button type="button" class="btn" data-lab="L">↺ Rotar a la izquierda</button>
+      <button type="button" class="btn" data-lab="R">↻ Rotar a la derecha</button>
+      <button type="button" class="btn ghost" data-lab="undo">Deshacer</button>
+      <label class="row small"><input type="checkbox" data-lab="bf" ${this.showBF?'checked':''}> Mostrar FB</label>
+      </div><p class="small muted labtip"></p>
+      <div class="labscroll"><svg class="labsvg" role="img" aria-label="Árbol interactivo"><g class="edges"></g><g class="slots"></g><g class="nodes"></g></svg></div></div>`;
+    this.root=host.firstElementChild;this.svg=$('svg',host);
+    this.gE=$('.edges',this.svg);this.gS=$('.slots',this.svg);this.gN=$('.nodes',this.svg);
+    this.bL=$('[data-lab=L]',host);this.bR=$('[data-lab=R]',host);this.bU=$('[data-lab=undo]',host);this.tip=$('.labtip',host);
+    this.bL.onclick=()=>{if(this.sel!==null)this.rotate(this.sel,'L');};
+    this.bR.onclick=()=>{if(this.sel!==null)this.rotate(this.sel,'R');};
+    this.bU.onclick=()=>this.undo();
+    $('[data-lab=bf]',host).onchange=e=>{this.showBF=e.target.checked;this.render(false);this.o.onChange?.('bf');};
+    this.svg.addEventListener('pointerdown',e=>this.down(e));
+    this.svg.addEventListener('pointermove',e=>this.move(e));
+    this.svg.addEventListener('pointerup',e=>this.up(e));
+    this.svg.addEventListener('pointercancel',()=>{if(this.drag){this.drag=null;this.render(true);}});
+  }
+  setTree(t,{keepHist=false,animate=true}={}){
+    this.stop();this.tree=t;
+    if(!keepHist){this.hist=[];this.rots=0;}
+    if(this.sel!==null&&!findNode(t,this.sel,numCmp))this.sel=null;
+    this.render(animate);
+  }
+  commit(t){
+    this.stop();
+    this.hist.push({tree:clone(this.tree),rots:this.rots});
+    this.tree=t;
+    if(this.sel!==null&&!findNode(t,this.sel,numCmp))this.sel=null;
+    this.render(true);this.o.onChange?.('commit');
+  }
+  rotate(at,dir){
+    if(this.mode!=='rotate')return;
+    const n=findNode(this.tree,at,numCmp);
+    if(!n||(dir==='R'&&!n.l)||(dir==='L'&&!n.r)){this.o.onMsg?.(`No se puede: el ${at} no tiene hijo ${dir==='R'?'izquierdo':'derecho'} para subir.`);this.render(true);return;}
+    this.hist.push({tree:clone(this.tree),rots:this.rots});
+    this.tree=rotAt(clone(this.tree),at,dir);fixH(this.tree);this.rots++;
+    this.render(true);this.o.onChange?.('rot',{at,dir});
+  }
+  undo(){
+    if(this.mode!=='rotate')return;
+    const h=this.hist.pop();if(!h)return;
+    this.tree=h.tree;this.rots=h.rots;
+    if(this.sel!==null&&!findNode(this.tree,this.sel,numCmp))this.sel=null;
+    this.render(true);this.o.onChange?.('undo');
+  }
+  setMode(m,render=true){this.mode=m;this.root.className='lab m-'+m;if(render)this.render(true);else this.updBar();}
+  stop(){this.timers.forEach(clearTimeout);this.timers=[];}
+  play(ops,done){
+    this.stop();const prev=this.mode;this.mode='view';this.root.className='lab m-view';this.updBar();
+    const finish=()=>{this.mode=prev;this.root.className='lab m-'+prev;this.render(false);done?.();};
+    if(!ops.length){this.timers.push(setTimeout(finish,300));return;}
+    ops.forEach((op,i)=>this.timers.push(setTimeout(()=>{
+      this.tree=rotAt(clone(this.tree),op.at,op.dir);fixH(this.tree);
+      this.hl={...this.hl,[op.at]:'piv'};this.render(true);
+      if(i===ops.length-1)this.timers.push(setTimeout(finish,700));
+    },600+i*1100)));
+  }
+  colW(){let m=2;(function w(n){if(!n)return;m=Math.max(m,String(n.k).length);w(n.l);w(n.r);})(this.tree);return Math.max(this.mode==='place'?40:46,m*9+24);}
+  layout(){
+    const pos=new Map(),slots=[],edges=[];let col=0,maxD=0;const withSlots=this.mode==='place';
+    const walk=(n,d,par,side)=>{
+      if(!n){if(withSlots){slots.push({col:col++,d,par,side});maxD=Math.max(maxD,d);}return;}
+      maxD=Math.max(maxD,d);
+      walk(n.l,d+1,n.k,'l');pos.set(n.k,{col:col++,d});walk(n.r,d+1,n.k,'r');
+      if(n.l)edges.push([n.k,n.l.k]);if(n.r)edges.push([n.k,n.r.k]);
+    };
+    walk(this.tree,0,null,null);
+    const cw=this.colW(),rh=withSlots?58:66;
+    const X=c=>16+c*cw+cw/2,Y=d=>32+d*rh;
+    const P=new Map();for(const [k,p] of pos)P.set(k,{x:X(p.col),y:Y(p.d)});
+    for(const s of slots){s.x=X(s.col);s.y=Y(s.d);}
+    return {P,slots,edges,W:Math.max(col*cw+32,260),H:Y(maxD)+32};
+  }
+  setSize(w,h){this.svg.setAttribute('width',w);this.svg.setAttribute('height',h);this.svg.setAttribute('viewBox',`0 0 ${w} ${h}`);}
+  render(animate=true){
+    if(this.anim){cancelAnimationFrame(this.anim);this.anim=null;this.cur=new Map(this.M);}
+    const L=this.L=this.layout();
+    const prevW=Number(this.svg.getAttribute('width'))||L.W,prevH=Number(this.svg.getAttribute('height'))||L.H;
+    this.gN.textContent='';this.nodeEls=new Map();
+    for(const [k] of L.P){
+      const n=findNode(this.tree,k,numCmp),w=Math.max(34,String(k).length*8.6+16);
+      const g=svgEl('g',{class:`nd lnode ${this.hl[k]||''}${this.sel===k?' sel':''}`,'data-k':k});
+      let inner=`<rect x="${-w/2}" y="-15" width="${w}" height="30" rx="15"/><text x="0" y="5">${k}</text>`;
+      if(this.showBF){const b=BF(n);inner+=`<text class="bf${Math.abs(b)>1?' bfbad':''}" x="${w/2-4}" y="-17">${sgn(b)}</text>`;}
+      g.innerHTML=inner;this.gN.appendChild(g);this.nodeEls.set(k,g);
+    }
+    this.gE.textContent='';
+    this.edgeEls=L.edges.map(([a,b])=>{const l=svgEl('line');this.gE.appendChild(l);return [a,b,l];});
+    this.gS.innerHTML=this.mode==='place'?L.slots.map((s,i)=>{
+      const p=s.par===null?null:L.P.get(s.par);
+      return (p?`<line class="slotedge" x1="${p.x}" y1="${p.y}" x2="${s.x}" y2="${s.y}"/>`:'')+`<g class="slot" data-slot="${i}" transform="translate(${s.x},${s.y})"><circle r="12"/><text x="0" y="5">+</text></g>`;
+    }).join(''):'';
+    this.updBar();
+    if(!L.P.size){this.setSize(L.W,L.H);this.cur=new Map();this.M=new Map();return;}
+    const from=new Map();for(const [k,p] of L.P)from.set(k,this.cur.get(k)||p);
+    if(!animate||reduceMotion()){this.setSize(L.W,L.H);this.apply(L.P);this.cur=new Map(L.P);return;}
+    this.setSize(Math.max(L.W,prevW),Math.max(L.H,prevH));
+    const t0=performance.now(),D=480;
+    const step=now=>{
+      const t=Math.min(1,(now-t0)/D),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      const M=new Map();for(const [k,p] of L.P){const f=from.get(k);M.set(k,{x:f.x+(p.x-f.x)*e,y:f.y+(p.y-f.y)*e});}
+      this.apply(M);
+      if(t<1)this.anim=requestAnimationFrame(step);else{this.anim=null;this.cur=new Map(L.P);this.setSize(L.W,L.H);}
+    };
+    this.apply(from);this.anim=requestAnimationFrame(step);
+  }
+  apply(M){
+    this.M=M;
+    for(const [k,g] of this.nodeEls){const p=M.get(k);g.setAttribute('transform',`translate(${p.x},${p.y})`);}
+    for(const [a,b,l] of this.edgeEls){const p=M.get(a),q=M.get(b);l.setAttribute('x1',p.x);l.setAttribute('y1',p.y);l.setAttribute('x2',q.x);l.setAttribute('y2',q.y);}
+  }
+  updBar(){
+    const n=this.sel!==null?findNode(this.tree,this.sel,numCmp):null,can=this.mode==='rotate';
+    this.bL.disabled=!(can&&n&&n.r);this.bR.disabled=!(can&&n&&n.l);this.bU.disabled=!(can&&this.hist.length);
+    this.bL.textContent=n?`↺ Rotar a la izquierda sobre ${n.k}`:'↺ Rotar a la izquierda';
+    this.bR.textContent=n?`↻ Rotar a la derecha sobre ${n.k}`:'↻ Rotar a la derecha';
+    this.tip.textContent=can?(n?(n.l||n.r?`Seleccionado: ${n.k}. "Derecha" sube su hijo izquierdo; "izquierda" sube su hijo derecho.`:`El ${n.k} no tiene hijos para subir.`):'Arrastre un nodo y suéltelo encima de su padre para subirlo (eso es una rotación). O haga clic en un nodo y use los botones.'):'';
+  }
+  svgPt(e){const pt=this.svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(this.svg.getScreenCTM().inverse());}
+  nodeAt(p,ex){let best=null,bd=30;for(const [k,q] of this.cur){if(k===ex)continue;const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<bd){bd=d;best=k;}}return best;}
+  rotPair(a,b){
+    if(b===null||b===undefined)return null;
+    const pa=parentOf(this.tree,a),pb=parentOf(this.tree,b);
+    if(pa&&pa.k===b)return {at:b,dir:pa.l&&pa.l.k===a?'R':'L'};
+    if(pb&&pb.k===a)return {at:a,dir:pb.l&&pb.l.k===b?'R':'L'};
+    return null;
+  }
+  down(e){
+    const s=e.target.closest('.slot');
+    if(s&&this.mode==='place'){this.o.onSlot?.(this.L.slots[Number(s.dataset.slot)],s);return;}
+    const g=e.target.closest('.lnode');if(!g)return;
+    const k=Number(g.dataset.k);
+    if(this.mode==='pick'){this.o.onPick?.(k,g);return;}
+    if(this.mode!=='rotate')return;
+    e.preventDefault();this.stop();
+    if(this.anim){cancelAnimationFrame(this.anim);this.anim=null;this.cur=new Map(this.M);}
+    this.drag={k,g,start:this.svgPt(e),moved:false};
+    try{this.svg.setPointerCapture(e.pointerId);}catch(_){}
+  }
+  move(e){
+    const d=this.drag;if(!d)return;
+    const p=this.svgPt(e),dx=p.x-d.start.x,dy=p.y-d.start.y;
+    if(!d.moved&&Math.hypot(dx,dy)<6)return;
+    if(!d.moved){d.moved=true;d.g.classList.add('dragging');this.gN.appendChild(d.g);}
+    const b=this.cur.get(d.k);d.pos={x:b.x+dx,y:b.y+dy};
+    d.g.setAttribute('transform',`translate(${d.pos.x},${d.pos.y})`);
+    const t=this.nodeAt(p,d.k),ok=!!this.rotPair(d.k,t);
+    for(const [k,g] of this.nodeEls)g.classList.toggle('droptarget',ok&&k===t);
+  }
+  up(e){
+    const d=this.drag;if(!d)return;this.drag=null;
+    try{this.svg.releasePointerCapture(e.pointerId);}catch(_){}
+    if(!d.moved){
+      this.sel=this.sel===d.k?null:d.k;
+      for(const [k,g] of this.nodeEls)g.classList.toggle('sel',k===this.sel);
+      this.updBar();return;
+    }
+    this.cur.set(d.k,d.pos);
+    const t=this.nodeAt(this.svgPt(e),d.k),r=this.rotPair(d.k,t);
+    if(r){this.rotate(r.at,r.dir);return;}
+    this.o.onMsg?.(t!==null?`El ${d.k} y el ${t} no son padre e hijo. Para rotar, suelte un nodo encima de su padre (o el padre encima de su hijo).`:'Suelte el nodo encima de su padre para subirlo con una rotación.');
+    this.render(true);
+  }
+}
+
+/* ===================== DRILL: hacerlo yo ===================== */
+const HD={};
+function hMsg(html,cls=''){const m=$('#hMsg');if(m){m.className='hmsg '+cls;m.innerHTML=html;}}
+const H_ROT_MSG='<b>Paso 2:</b> ¿quedó desbalanceado? Si sí, rote: arrastre un nodo y suéltelo encima de su padre (o haga clic en un nodo y use los botones). Si no hace falta, presione <b>Listo</b>.';
+function dHandsRender(){
+  const q=D.q,isIns=D.mode==='ins';
+  clearTimeout(HD.timer);
+  $('#dBody').innerHTML=`<p class="statement">${isIns?`Insertar <b>${q.k}</b>`:`Eliminar <b>${q.k}</b> (con predecesor)`}</p>
+    <div id="hMsg" class="hmsg"></div><div id="hLab"></div>
+    <div class="actions"><button class="btn primary" id="hGo" data-act="hDone">Listo, revisar</button><button class="btn" data-act="hHint">Pista</button><button class="btn ghost" data-act="hReset">Volver a empezar</button><button class="btn ghost" data-act="hSolve">Ver solución</button><button class="btn ghost" data-act="dSkip">Otro</button></div>
+    <div id="dFb"></div>`;
+  HD.scored=false;HD.done=false;HD.phase=null;HD.start=null;
+  HD.lab=new TreeLab($('#hLab'),{showBF:$('#dShowBF').checked,onMsg:m=>hMsg(m,'bad'),onSlot:hSlot,onPick:hPick,
+    onChange:type=>{if(HD.phase==='rotate'&&!HD.done&&type!=='bf')hMsg(`Rotaciones hechas: <b>${HD.lab.rots}</b>. Cuando crea que quedó balanceado, presione <b>Listo</b>.`);}});
+  HD.lab.setTree(clone(q.tree),{animate:false});
+  if(isIns){HD.phase='place';HD.lab.setMode('place');hMsg(`<b>Paso 1:</b> haga clic en el hueco <b>+</b> donde va el ${q.k}.`);return;}
+  HD.lab.hl={[q.k]:'gone'};
+  if(predOf(q.tree,q.k)!==null){HD.phase='pick';HD.lab.setMode('pick');hMsg(`<b>Paso 1:</b> el ${q.k} tiene dos hijos. Haga clic en el nodo que lo va a reemplazar.`);return;}
+  const n=findNode(q.tree,q.k,numCmp);
+  HD.phase='auto';HD.lab.setMode('view');
+  hMsg(`<b>Paso 1:</b> el ${q.k} ${n.l||n.r?'tiene un solo hijo: ese hijo sube a su lugar':'es hoja: se quita directamente'}.`);
+  HD.timer=setTimeout(hAfterRemove,1100);
+}
+function hSlot(s,el){
+  const q=D.q,sp=bstSpot(q.tree,q.k);
+  if(s.par===sp.par&&s.side===sp.side){
+    const t=bstIns(clone(q.tree),q.k,numCmp);fixH(t);
+    HD.phase='rotate';HD.lab.hl={[q.k]:'new'};HD.lab.setMode('rotate',false);HD.lab.setTree(t);HD.start=clone(t);
+    hMsg(H_ROT_MSG);
+  }else{el.classList.add('wrong');hMsg(`Ese hueco no es. ${spotText(q.k,sp)}`,'bad');}
+}
+function hPick(k){
+  const q=D.q,pr=predOf(q.tree,q.k);
+  if(k===pr)hAfterRemove();
+  else hMsg(`No. Lo reemplaza su <b>predecesor</b>: el mayor del subárbol izquierdo. Desde el ${q.k}, un paso a la izquierda y luego todo a la derecha.`,'bad');
+}
+function hAfterRemove(){
+  const q=D.q,t=bstDel(clone(q.tree),q.k,numCmp);fixH(t);
+  const pr=predOf(q.tree,q.k);
+  HD.phase='rotate';HD.lab.hl=pr!==null?{[pr]:'new'}:{};HD.lab.setMode('rotate',false);HD.lab.setTree(t);HD.start=clone(t);
+  hMsg((pr!==null?`El ${pr} sube al lugar del ${q.k}. `:'')+H_ROT_MSG);
+}
+ACT.hDone=()=>{
+  if(HD.done){dNew();return;}
+  if(HD.phase!=='rotate'){hMsg('Primero termine el paso 1.','bad');return;}
+  const st=D.q.st,t=HD.lab.tree,bad=badNodes(clone(t)),same=sameList(pre(t),pre(st.after));
+  const need=opsFromLog(st.log).length;
+  let ok=false,html;
+  if(same){ok=true;html=`<div class="verdict">¡Correcto!</div><p>Usó ${HD.lab.rots} rotación(es)${HD.lab.rots>need?`; bastaban ${need}`:''}.</p>`;}
+  else if(bad.length)html=`<div class="verdict">Todavía no está balanceado</div><p>${HD.lab.showBF?`Nodos con FB ±2: <b>${bad.join(', ')}</b>.`:'Hay nodos con FB ±2. Active "Mostrar FB" para verlos.'} Siga rotando, use Deshacer, o pida una Pista.</p>`;
+  else html='<div class="verdict">Balanceado, pero no es lo que hace el AVL</div><p>El algoritmo solo rota alrededor del pivote (el primer nodo desbalanceado, subiendo desde donde hubo el cambio). Use Pista o Ver solución.</p>';
+  if(!HD.scored){HD.scored=true;D.tot++;if(ok){D.ok++;D.streak++;D.best=Math.max(D.best,D.streak);}else D.streak=0;dStats();}
+  $('#dFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}">${html}${ok?explainLog(st.log):''}</div>`;
+  if(ok){HD.done=true;HD.lab.setMode('view');$('#hGo').textContent='Siguiente →';}
+};
+ACT.hHint=()=>{
+  const q=D.q,st=q.st;
+  if(HD.phase==='place'){const sp=bstSpot(q.tree,q.k),f=sp.path[0];hMsg(f?`Empiece por la raíz: ${q.k} ${f.dir==='l'?'&lt;':'&gt;'} ${f.k}, así que baje por la ${f.dir==='l'?'izquierda':'derecha'}. Siga comparando hasta encontrar un hueco.`:'El árbol está vacío: va en la raíz.');return;}
+  if(HD.phase==='pick'){hMsg(`Desde el ${q.k}: un paso a la izquierda (al ${findNode(q.tree,q.k,numCmp).l.k}) y luego todo a la derecha hasta que no se pueda más.`);return;}
+  const rots=st.log.filter(e=>e.t==='rot');
+  hMsg(rots.length?rots.map(e=>rotText(e,String)).join('<br>')+(HD.lab.rots?'<br><i>Esto es desde el árbol recién modificado. Si ya rotó algo, use "Volver a empezar".</i>':''):'No hace falta ninguna rotación: subiendo hasta la raíz, todos los FB quedan en −1, 0 o +1. Presione <b>Listo</b>.');
+};
+ACT.hReset=()=>{
+  if(HD.done)return;
+  if(HD.phase==='rotate'){HD.lab.setTree(clone(HD.start));hMsg(H_ROT_MSG);}
+  else dHandsRender();
+};
+ACT.hSolve=()=>{
+  const q=D.q,st=q.st;clearTimeout(HD.timer);
+  if(HD.phase!=='rotate'){
+    const t=D.mode==='ins'?bstIns(clone(q.tree),q.k,numCmp):bstDel(clone(q.tree),q.k,numCmp);fixH(t);HD.start=clone(t);HD.phase='rotate';
+  }
+  HD.lab.setMode('rotate',false);
+  HD.lab.hl=D.mode==='ins'?{[q.k]:'new'}:{};
+  HD.lab.setTree(clone(HD.start));
+  if(!HD.scored){HD.scored=true;D.tot++;D.streak=0;dStats();}
+  HD.done=true;$('#hGo').textContent='Siguiente →';
+  hMsg('Mire las rotaciones: el nodo naranja es donde se rota.');
+  $('#dFb').innerHTML=`<div class="fb bad"><div class="verdict">Solución</div>${explainLog(st.log)}</div>`;
+  HD.lab.play(opsFromLog(st.log),()=>HD.lab.setMode('view'));
+};
+
+/* ===================== TALLER LIBRE ===================== */
+const WS={lab:null,pending:null,pendingDel:null,st:null,start:null,exp:null,expHist:0};
+function wStatus(html,cls=''){const s=$('#wStatus');s.className='hmsg '+cls;s.innerHTML=html;}
+function wInfo(){
+  const t=WS.lab.tree;
+  $('#wInfo').innerHTML=t?`<div class="tscroll"><table class="t"><tbody>
+    <tr><td><b>Inorden</b></td><td class="mono">${ino(t).join(', ')}</td></tr>
+    <tr><td><b>Preorden</b></td><td class="mono">${pre(t).join(', ')}</td></tr>
+    <tr><td><b>Postorden</b></td><td class="mono">${post(t).join(', ')}</td></tr>
+    <tr><td><b>Anchura (BFS)</b></td><td class="mono">${bfs(t).join(', ')}</td></tr>
+    <tr><td><b>Altura</b></td><td class="mono">${heightOf(t)}</td></tr>
+    <tr><td><b>Hojas</b></td><td class="mono">${leavesOf(t).join(', ')}</td></tr>
+    <tr><td><b>Nodos</b></td><td class="mono">${countOf(t)}</td></tr></tbody></table></div>`:'<p class="muted">Árbol vacío.</p>';
+}
+function wUpdate(type){
+  if(type==='undo'&&WS.lab.hist.length<WS.expHist){WS.exp=null;WS.st=null;}
+  wInfo();
+  if(WS.pending!==null||WS.pendingDel!==null||WS.lab.mode==='view')return;
+  const t=WS.lab.tree,mode=$('#wMode').value;
+  if(mode==='bst'){wStatus(`BST con ${countOf(t)} nodos. En este modo no se balancea.`);return;}
+  const bad=t?badNodes(clone(t)):[];
+  if(bad.length){wStatus(`✗ No es AVL: ${WS.lab.showBF?`nodos con FB ±2: <b>${bad.join(', ')}</b>`:'hay nodos con FB ±2 (active "Mostrar FB" para verlos)'}. Rote arrastrando un nodo encima de su padre, o pida una Pista.`,'bad');return;}
+  if(WS.exp&&!sameList(pre(t),pre(WS.exp))){wStatus('⚠ Está balanceado, pero no es lo que haría el algoritmo AVL. Use Pista o Deshacer.','bad');return;}
+  wStatus(t?`✓ Es un AVL válido · ${countOf(t)} nodos · altura ${heightOf(t)}. Inserte otro número.`:'Árbol vacío. Escriba un número y presione Insertar.','ok');
+}
+function wInit(){
+  WS.lab=new TreeLab($('#wLab'),{showBF:true,onMsg:m=>wStatus(m,'bad'),onSlot:wSlot,onPick:wPick,onChange:wUpdate});
+  WS.lab.setTree(buildAVL([40,20,60,10,30],numCmp),{animate:false});
+  wUpdate();
+}
+ACT.wIns=()=>{
+  const raw=$('#wNum').value.trim(),v=Number(raw);
+  if(raw===''||!Number.isFinite(v)){wStatus('Escriba un número.','bad');return;}
+  if(WS.pending!==null||WS.pendingDel!==null){wStatus('Primero termine la operación pendiente.','bad');return;}
+  if(findNode(WS.lab.tree,v,numCmp)){wStatus(`El ${v} ya está en el árbol.`,'bad');return;}
+  $('#wNum').value='';
+  if($('#wSpot').checked){WS.pending=v;WS.lab.setMode('place');wStatus(`Haga clic en el hueco <b>+</b> donde va el ${v}.`);return;}
+  wApplyIns(v);
+};
+function wSlot(s,el){
+  const v=WS.pending,sp=bstSpot(WS.lab.tree,v);
+  if(s.par===sp.par&&s.side===sp.side){WS.pending=null;WS.lab.setMode('rotate',false);wApplyIns(v);}
+  else{el.classList.add('wrong');wStatus(`Ese hueco no es. ${spotText(v,sp)}`,'bad');}
+}
+function wApplyOp(raw,st){
+  const mode=$('#wMode').value;
+  WS.st=null;WS.exp=null;$('#wLog').innerHTML='';
+  if(mode==='bst'){WS.lab.commit(raw);return;}
+  WS.st=st;WS.start=clone(raw);
+  if(mode==='auto'){
+    WS.lab.commit(raw);
+    if(st){$('#wLog').innerHTML=explainLog(st.log);wStatus('Balanceando automáticamente…');WS.lab.play(opsFromLog(st.log),()=>{WS.lab.hl={};wUpdate();});}
+    return;
+  }
+  WS.exp=st?st.after:null;WS.lab.commit(raw);WS.expHist=WS.lab.hist.length;wUpdate();
+}
+function wValid(){const t=WS.lab.tree;return !t||badNodes(clone(t)).length===0;}
+function wApplyIns(v){
+  const t0=WS.lab.tree,raw=bstIns(clone(t0),v,numCmp);fixH(raw);
+  WS.lab.hl={[v]:'new'};
+  wApplyOp(raw,wValid()?stepInsert(t0,v,numCmp):null);
+}
+ACT.wDel=()=>{
+  if(WS.pending!==null||WS.pendingDel!==null){wStatus('Primero termine la operación pendiente.','bad');return;}
+  const t=WS.lab.tree;let v=WS.lab.sel;
+  if(v===null){const x=$('#wNum').value.trim();if(x!=='')v=Number(x);}
+  if(v===null||!findNode(t,v,numCmp)){wStatus('Haga clic en un nodo para seleccionarlo (o escriba su número) y luego presione Eliminar.','bad');return;}
+  $('#wNum').value='';
+  if(predOf(t,v)!==null&&$('#wSpot').checked){WS.pendingDel=v;WS.lab.hl={[v]:'gone'};WS.lab.setMode('pick');wStatus(`El ${v} tiene dos hijos. Haga clic en el nodo que lo reemplaza.`);return;}
+  wApplyDel(v);
+};
+function wPick(k){
+  const v=WS.pendingDel,pr=predOf(WS.lab.tree,v);
+  if(k===pr){WS.pendingDel=null;WS.lab.setMode('rotate',false);wApplyDel(v);}
+  else wStatus(`No. Se usa el predecesor: desde el ${v}, un paso a la izquierda y luego todo a la derecha.`,'bad');
+}
+function wApplyDel(v){
+  const t0=WS.lab.tree,pr=predOf(t0,v),raw=bstDel(clone(t0),v,numCmp);fixH(raw);
+  WS.lab.hl=pr!==null?{[pr]:'new'}:{};WS.lab.sel=null;
+  wApplyOp(raw,wValid()?stepDelete(t0,v,numCmp):null);
+}
+ACT.wRand=()=>{let v,i=0;do{v=rnd(1,99);i++;}while(findNode(WS.lab.tree,v,numCmp)&&i<500);$('#wNum').value=v;ACT.wIns();};
+ACT.wClear=()=>{WS.pending=null;WS.pendingDel=null;WS.st=null;WS.exp=null;WS.lab.hl={};WS.lab.setMode('rotate',false);WS.lab.setTree(null);$('#wLog').innerHTML='';wUpdate();};
+ACT.wHint=()=>{
+  if(WS.pending!==null){wStatus(spotText(WS.pending,bstSpot(WS.lab.tree,WS.pending)));return;}
+  if(WS.pendingDel!==null){wStatus(`El predecesor del ${WS.pendingDel} es el mayor de su subárbol izquierdo: el <b>${predOf(WS.lab.tree,WS.pendingDel)}</b>.`);return;}
+  if($('#wMode').value!=='manual'){wStatus('Las pistas son para el modo "AVL: yo balanceo".');return;}
+  const t=WS.lab.tree;
+  if(!WS.st||!WS.exp){wStatus(t&&badNodes(clone(t)).length?'No tengo pista: el árbol ya estaba desbalanceado antes de la última operación. Use Deshacer.':'El árbol está balanceado. Inserte otro número.');return;}
+  if(sameList(pre(t),pre(WS.exp))){wStatus('Ya quedó igual que el algoritmo AVL ✓','ok');return;}
+  const rots=WS.st.log.filter(e=>e.t==='rot');
+  wStatus(rots.length?rots.map(e=>rotText(e,String)).join('<br>')+(WS.lab.rots?'<br><i>Esto es desde el árbol recién modificado. Si ya rotó algo, use Deshacer.</i>':''):'No hace falta rotar.');
+};
+ACT.wFix=()=>{
+  if($('#wMode').value!=='manual'){wStatus('En este modo no hace falta: use "AVL: yo balanceo".');return;}
+  if(!WS.st||!WS.exp){wStatus('No puedo: el árbol ya estaba desbalanceado antes de la última operación. Use Deshacer.','bad');return;}
+  WS.lab.setMode('rotate',false);WS.lab.setTree(clone(WS.start),{keepHist:true});
+  $('#wLog').innerHTML=explainLog(WS.st.log);wStatus('Mire las rotaciones: el nodo naranja es donde se rota.');
+  WS.lab.play(opsFromLog(WS.st.log),()=>{WS.lab.hl={};wUpdate();});
+};
+$('#wMode').addEventListener('change',()=>wUpdate());
+wInit();
+
+/* ===================== PARCIAL ===================== */
+function primesN(n){const r=[];for(let x=2;r.length<n;x++){let p=true;for(let d=2;d*d<=x;d++)if(x%d===0){p=false;break;}if(p)r.push(x);}return r;}
+const SERIES=[
+  {id:'primos1',words:'Todos los números primos más 1',formula:'aₙ = pₙ + 1, donde pₙ es el n-ésimo primo (p₁ = 2), n ≥ 1',gen:n=>primesN(n).map(p=>p+1)},
+  {id:'cuad1',words:'Los cuadrados perfectos menos uno, empezando desde 1²',formula:'aₙ = n² − 1, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>(i+1)**2-1)},
+  {id:'triang',words:'Los números triangulares',formula:'aₙ = n(n + 1) / 2, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>(i+1)*(i+2)/2)},
+  {id:'mult3',words:'Los múltiplos de 3 aumentados en 2',formula:'aₙ = 3n + 2, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>3*(i+1)+2)},
+  {id:'fib',words:'La sucesión de Fibonacci empezando en 1 y 2',formula:'a₁ = 1, a₂ = 2, aₙ = aₙ₋₁ + aₙ₋₂ para n ≥ 3',gen:n=>{const r=[1,2];while(r.length<n)r.push(r[r.length-1]+r[r.length-2]);return r.slice(0,n);}},
+  {id:'impar2',words:'Los números impares elevados al cuadrado',formula:'aₙ = (2n − 1)², n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>(2*(i+1)-1)**2)},
+  {id:'par4',words:'Los números pares que no son múltiplos de 4',formula:'aₙ = 4n − 2, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>4*(i+1)-2)},
+  {id:'cien5',words:'Cien menos los múltiplos de 5',formula:'aₙ = 100 − 5n, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>100-5*(i+1))},
+  {id:'sesentap',words:'Sesenta menos cada número primo',formula:'aₙ = 60 − pₙ, donde pₙ es el n-ésimo primo, n ≥ 1',gen:n=>primesN(n).map(p=>60-p)},
+  {id:'alt',words:'Los naturales con signo alternado, empezando en negativo',formula:'aₙ = (−1)ⁿ · n, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>(i%2===0?-1:1)*(i+1))},
+  {id:'primalt',words:'Los primos con signo alternado, el primero positivo',formula:'aₙ = (−1)ⁿ⁺¹ · pₙ, n ≥ 1',gen:n=>primesN(n).map((p,i)=>i%2===0?p:-p)},
+  {id:'mod23',words:'El residuo de dividir 7 veces n entre 23',formula:'aₙ = 7n mod 23, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>(7*(i+1))%23)},
+  {id:'mod31',words:'El residuo de dividir n al cuadrado entre 31',formula:'aₙ = n² mod 31, n ≥ 1',gen:n=>Array.from({length:n},(_,i)=>((i+1)**2)%31)},
+];
+$('#pSerie').innerHTML='<option value="rand">Al azar</option>'+SERIES.map(s=>`<option value="${s.id}">${esc(s.words)}</option>`).join('');
+const P={};
+function pNew(){
+  const sel=$('#pSerie').value;
+  P.s=sel==='rand'?pick(SERIES):SERIES.find(s=>s.id===sel);
+  P.n=Math.min(15,Math.max(5,Number($('#pN').value)||15));
+  P.terms=P.s.gen(P.n);
+  P.keys=$('#pOrder').value==='mix'?shuffle(P.terms):P.terms.slice();
+  P.phase='serie';P.mode='step';P.i=0;P.tree=null;P.answered=false;P.dels=[];P.di=0;P.score={ok:0,tot:0};
+  pRender();
+}
+ACT.pNew=pNew;
+function pRender(){({serie:pSerieR,ins:pInsR,del:pDelR,ana:pAnaR})[P.phase]();}
+function pSerieR(){
+  $('#pBody').innerHTML=`<div class="card">
+    <div class="eyebrow">Paso 1 de 4 · La serie</div>
+    <p class="statement">«${esc(P.s.words)}»</p>
+    <div class="field"><label for="pf">a) Escríbala en lenguaje matemático (en papel o aquí)</label><input id="pf" class="wide mathin" placeholder="ej: a_n = 2n + 1, n >= 1" autocomplete="off" spellcheck="false">
+      <div class="sympad" aria-label="Símbolos">${SYMS.map(x=>`<button type="button" class="sym" data-act="symIns" data-s="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+      <p class="note">También puede escribir normal: <code>a_n</code> → aₙ · <code>n^2</code> → n² · <code>>=</code> → ≥ · <code><=</code> → ≤ · <code>_1</code> → ₁. Se convierte solo.</p>
+      <div class="row"><button class="btn ghost" data-act="pfShow">Comparar con la respuesta</button></div><div id="pfAns" class="answer" hidden>${esc(P.s.formula)}<br><span class="muted">Con teclado normal: ${esc(asciiMath(P.s.formula))}</span></div></div>
+    <div class="field"><label for="pl">b) Liste los primeros ${P.n} términos, separados por coma</label><input id="pl" class="mono wide" data-enter="plCheck"><div class="row"><button class="btn" data-act="plCheck">Revisar lista</button></div><div id="plFb"></div></div>
+    <p class="note">¿No sabe cómo armar la fórmula? Vea la pestaña <b>Series</b>: base + lo que le hacen.</p>
+    <p class="note">"Hasta n = 15" casi siempre significa los primeros 15 términos. Si el enunciado dice "los menores o iguales a 15", es otra cosa: pregunte.</p>
+    <div class="actions"><button class="btn primary" data-act="pToIns">Pasar a insertar →</button></div>
+  </div>`;
+  $('#pf').addEventListener('input',e=>mathConvert(e.target));
+}
+const SYMS=['ₙ','ₙ₋₁','ₙ₋₂','²','³','ⁿ','≥','≤','≠','·','−','pₙ','(−1)ⁿ','∈','ℕ','mod','√'];
+const SUB={'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','n':'ₙ'};
+const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','n':'ⁿ'};
+function mathConvert(inp){
+  const v=inp.value,pos=inp.selectionStart;
+  const nv=v.replace(/_([0-9n])/g,(m,c)=>SUB[c]).replace(/\^([0-9n])/g,(m,c)=>SUP[c]).replace(/>=/g,'≥').replace(/<=/g,'≤').replace(/!=/g,'≠');
+  if(nv!==v){inp.value=nv;const p=Math.max(0,pos-(v.length-nv.length));inp.setSelectionRange(p,p);}
+}
+function asciiMath(f){
+  const back={};for(const [k,v] of Object.entries(SUB))back[v]='_'+k;for(const [k,v] of Object.entries(SUP))back[v]='^'+k;
+  Object.assign(back,{'≥':'>=','≤':'<=','≠':'!=','·':'*','−':'-','₊':'+','₋':'-','⁺':'+'});
+  return f.replace(/./gu,c=>back[c]??c).replace(/_n-_1/g,'_(n-1)').replace(/_n-_2/g,'_(n-2)').replace(/\^n\+\^1/g,'^(n+1)');
+}
+ACT.symIns=b=>{
+  const inp=$('#pf');const s0=inp.selectionStart??inp.value.length,s1=inp.selectionEnd??s0;
+  inp.value=inp.value.slice(0,s0)+b.dataset.s+inp.value.slice(s1);
+  const p=s0+b.dataset.s.length;inp.focus();inp.setSelectionRange(p,p);
+};
+ACT.pfShow=()=>{$('#pfAns').hidden=false;};
+ACT.plCheck=()=>{
+  const u=parseList($('#pl').value);const ok=sameList(u,P.terms);
+  $('#plFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><div class="verdict">${ok?'¡Lista correcta!':'Revise'}</div>${ok?'':`<p>${listDiff(u,P.terms)}</p><p>Correcta: <span class="mono">${P.terms.join(', ')}</span></p>`}</div>`;
+};
+ACT.pToIns=()=>{P.phase='ins';P.i=0;P.tree=null;pRender();window.scrollTo({top:$('#pBody').offsetTop-70});};
+function chipsHTML(list,i){return `<div class="chips">${list.map((k,j)=>`<span class="chip ${j<i?'done':j===i?'cur':''}">${k}</span>`).join('')}</div>`;}
+function pInsR(){
+  const seg=`<div class="seg" role="group" aria-label="Modo"><button aria-pressed="${P.mode==='step'}" data-act="pMode" data-m="step">Paso a paso</button><button aria-pressed="${P.mode==='all'}" data-act="pMode" data-m="all">Todo de una</button></div>`;
+  const order=$('#pOrder').value==='mix'?`<p class="note">Orden de inserción (mezclado): <span class="mono">${P.keys.join(', ')}</span></p>`:'';
+  if(P.mode==='all'){
+    $('#pBody').innerHTML=`<div class="card"><div class="eyebrow">Paso 2 de 4 · Insertar en AVL</div><div class="row" style="justify-content:space-between">${seg}</div>
+      <p class="statement">Inserte en orden: <span class="mono">${P.keys.join(', ')}</span></p>${order}
+      <p>Hágalo todo en papel. Al final escriba el <b>preorden</b> de su árbol (el preorden identifica el árbol completo).</p>
+      <div class="field"><label for="pAllPre">Preorden del árbol final</label><input id="pAllPre" class="mono wide" data-enter="pAllCheck"></div>
+      <div class="actions"><button class="btn primary" data-act="pAllCheck">Revisar</button></div><div id="pAllFb"></div></div>`;
+    return;
+  }
+  const k=P.keys[P.i];
+  $('#pBody').innerHTML=`<div class="card"><div class="eyebrow">Paso 2 de 4 · Insertar en AVL · ${P.i+1} de ${P.keys.length}</div>
+    <div class="row" style="justify-content:space-between">${seg}<span class="stats">Aciertos <b>${P.score.ok}/${P.score.tot}</b></span></div>
+    ${chipsHTML(P.keys,P.i)}
+    <div class="trees">${fig('Árbol actual',drawBin(P.tree,{bf:!!P.showBF}))}</div>
+    <label class="row small"><input type="checkbox" id="pBF" ${P.showBF?'checked':''}> Mostrar FB</label>
+    <p class="statement">Insertar <b>${k}</b>: ¿qué pasa?</p>
+    ${rotChoice('pRot')}
+    <div class="field" style="max-width:240px"><label for="pPiv">Nodo pivote (si hay rotación)</label><input id="pPiv" type="number" data-enter="pStep"></div>
+    <div class="actions"><button class="btn primary" id="pGo" data-act="pStep">Revisar</button><button class="btn ghost" data-act="pFinishIns">Insertar todo lo que falta</button></div>
+    <div id="pFb"></div></div>`;
+  $('#pBF').addEventListener('change',()=>{P.showBF=$('#pBF').checked;$('#pBody .trees').innerHTML=fig('Árbol actual',drawBin(P.tree,{bf:P.showBF}));});
+}
+ACT.pMode=b=>{P.mode=b.dataset.m;pRender();};
+ACT.pStep=()=>{
+  if(P.answered){P.answered=false;P.i++;if(P.i>=P.keys.length){pToDel();return;}pRender();return;}
+  const ch=chosen('pRot');
+  if(!ch){$('#pFb').innerHTML='<div class="fb bad">Elija una opción de rotación.</div>';return;}
+  const k=P.keys[P.i];const st=stepInsert(P.tree,k,numCmp);
+  const cc=st.rot?st.rot.cs:'none';
+  const okC=ch===cc,okP=!st.rot||Number($('#pPiv').value)===st.rot.p,ok=okC&&okP;
+  P.score.tot++;if(ok)P.score.ok++;
+  P.tree=st.after;P.answered=true;
+  $('#pFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><div class="verdict">${ok?'¡Correcto!':'Todavía no'}</div>${okC?'':`<p>Era <b>${CASE_TXT[cc]}</b>.</p>`}${okC&&!okP?`<p>El pivote era <b>${st.rot.p}</b>.</p>`:''}${explainLog(st.log)}${insFigs(st)}</div>`;
+  $('#pGo').textContent=P.i+1>=P.keys.length?'Pasar a eliminar →':'Siguiente inserción →';
+};
+ACT.pFinishIns=()=>{for(let j=P.i+(P.answered?1:0);j<P.keys.length;j++)P.tree=avlIns(P.tree,P.keys[j],numCmp,[]);pToDel();};
+ACT.pAllCheck=()=>{
+  let t=null;const steps=[];for(const k of P.keys){const st=stepInsert(t,k,numCmp);steps.push(st);t=st.after;}
+  const correct=pre(t);const u=parseList($('#pAllPre').value);const ok=sameList(u,correct);
+  P.tree=t;
+  $('#pAllFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><div class="verdict">${ok?'¡Árbol correcto!':'No coincide'}</div>${ok?'':`<p>${listDiff(u,correct)}</p>`}<p>Preorden correcto: <span class="mono">${correct.join(', ')}</span></p>
+    <div class="trees">${fig('Árbol final',drawBin(t,{bf:true}))}</div>
+    <details><summary>Ver cada inserción paso a paso</summary>${steps.map((st,j)=>`<h4>${j+1}. Insertar ${st.k}${st.rot?` → ${st.rot.cs} en ${st.rot.p}`:''}</h4>${explainLog(st.log)}${insFigs(st)}`).join('')}</details>
+    <div class="actions"><button class="btn primary" data-act="pToDelBtn">Pasar a eliminar →</button></div></div>`;
+};
+ACT.pToDelBtn=()=>pToDel();
+function chooseDels(t){
+  const all=ino(t);const two=all.filter(k=>{const n=findNode(t,k,numCmp);return n.l&&n.r;});
+  const first=Math.random()<0.5?t.k:pick(two.length?two:all);
+  const rest=shuffle(all.filter(k=>k!==first)).slice(0,2);
+  return [first,...rest];
+}
+function pToDel(){P.phase='del';P.dels=chooseDels(P.tree);P.di=0;P.answered=false;pRender();window.scrollTo({top:$('#pBody').offsetTop-70});}
+function pDelR(){
+  const k=P.dels[P.di];
+  $('#pBody').innerHTML=`<div class="card"><div class="eyebrow">Paso 3 de 4 · Eliminar con predecesor · ${P.di+1} de ${P.dels.length}</div>
+    <p>El profe eligió: ${P.dels.map((x,j)=>`<span class="chip ${j<P.di?'done':j===P.di?'cur':''}">${x}</span>`).join(' ')}</p>
+    ${P.di===0&&!P.answered?`<div class="row small"><label for="pDelsIn">Cambiar los nodos a eliminar:</label><input id="pDelsIn" class="mono" value="${P.dels.join(', ')}" style="width:160px"><button class="btn ghost" data-act="pSetDels">Usar estos</button></div><div id="pDelsMsg" class="small"></div>`:''}
+    <div class="trees">${fig('Árbol actual',drawBin(P.tree,{cls:n=>n.k===k?'gone':''}))}</div>
+    <p class="statement">Eliminar <b>${k}</b></p>
+    <div class="lbl">¿Cuál es la primera rotación que ocurre?</div>${rotChoice('pdRot')}
+    <div class="field"><label for="pdPre">Preorden del árbol ya balanceado</label><input id="pdPre" class="mono wide" data-enter="pDelStep"></div>
+    <div class="actions"><button class="btn primary" id="pdGo" data-act="pDelStep">Revisar</button></div><div id="pdFb"></div></div>`;
+}
+ACT.pSetDels=()=>{
+  const u=parseList($('#pDelsIn').value);
+  if(!u||!u.length||u.some(x=>!findNode(P.tree,x,numCmp))){$('#pDelsMsg').innerHTML='<span class="mark-bad">Todos tienen que estar en el árbol.</span>';return;}
+  P.dels=u;pRender();
+};
+ACT.pDelStep=()=>{
+  if(P.answered){P.answered=false;P.di++;if(P.di>=P.dels.length){pToAna();return;}pRender();return;}
+  const ch=chosen('pdRot');
+  if(!ch){$('#pdFb').innerHTML='<div class="fb bad">Elija una opción de rotación (o "Ninguna").</div>';return;}
+  const k=P.dels[P.di];const st=stepDelete(P.tree,k,numCmp);
+  const cc=st.rots.length?st.rots[0].cs:'none';
+  const correct=pre(st.after);const u=parseList($('#pdPre').value);
+  const okC=ch===cc,okP=sameList(u,correct),ok=okC&&okP;
+  P.score.tot++;if(ok)P.score.ok++;
+  P.tree=st.after;P.answered=true;
+  $('#pdFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><div class="verdict">${ok?'¡Correcto!':'Todavía no'}</div>${okC?'':`<p>Primera rotación: <b>${CASE_TXT[cc]}</b>.</p>`}${okP?'':`<p>Preorden: ${listDiff(u,correct)}</p>`}<p>Preorden correcto: <span class="mono">${correct.join(', ')}</span></p>${st.rots.length>1?`<p><b>Hubo ${st.rots.length} rotaciones.</b></p>`:''}${explainLog(st.log)}${delFigs(st)}</div>`;
+  $('#pdGo').textContent=P.di+1>=P.dels.length?'Pasar a recorridos →':'Siguiente eliminación →';
+};
+function pToAna(){P.phase='ana';pRender();window.scrollTo({top:$('#pBody').offsetTop-70});}
+function pAnaR(){
+  const t=P.tree,L=levels(t);const nonRoot=ino(t).filter(k=>k!==t.k);
+  const dk=pick(nonRoot.length?nonRoot:[t.k]);const lv=L.length>1?rnd(1,L.length-1):0;
+  const maxW=Math.max(...L.map(x=>x.length));
+  P.qs=[
+    {id:'in',label:'Inorden',type:'list',ans:ino(t)},
+    {id:'pre',label:'Preorden',type:'list',ans:pre(t)},
+    {id:'post',label:'Postorden',type:'list',ans:post(t)},
+    {id:'bfs',label:'Recorrido en anchura (por niveles)',type:'list',ans:bfs(t)},
+    {id:'h',label:'Altura del árbol',type:'num',ans:heightOf(t)},
+    {id:'d',label:`Profundidad del nodo ${dk}`,type:'num',ans:depthOf(t,dk,numCmp)},
+    {id:'w',label:'Anchura máxima (más nodos en un nivel)',type:'num',ans:maxW},
+    {id:'lv',label:`Nodos del nivel ${lv} (cualquier orden)`,type:'set',ans:L[lv]},
+    {id:'lf',label:'Hojas (cualquier orden)',type:'set',ans:leavesOf(t)},
+    {id:'n',label:'Número total de nodos',type:'num',ans:countOf(t)},
+  ];
+  $('#pBody').innerHTML=`<div class="card"><div class="eyebrow">Paso 4 de 4 · Recorridos y medidas</div>
+    <p class="muted">Use su árbol de papel. Raíz = nivel 0, hoja = altura 0. Aciertos en inserción/eliminación: <b>${P.score.ok}/${P.score.tot}</b>.</p>
+    <details><summary>Ver el árbol final correcto</summary>${drawBin(t,{})}</details>
+    <div class="qgrid" style="margin-top:12px">${P.qs.map(q=>`<div class="q" id="q_${q.id}"><label for="qi_${q.id}" class="lbl">${q.label}</label><input id="qi_${q.id}" class="mono" ${q.type==='num'?'type="number"':''}><div class="res"></div></div>`).join('')}</div>
+    <div class="actions"><button class="btn primary" data-act="pAnaCheck">Revisar todo</button><button class="btn" data-act="pNew">Nuevo parcial</button></div></div>`;
+}
+ACT.pAnaCheck=()=>{
+  let okc=0;
+  for(const q of P.qs){
+    const v=$('#qi_'+q.id).value;let ok;
+    if(q.type==='num')ok=v.trim()!==''&&Number(v)===q.ans;
+    else{const u=parseList(v);ok=q.type==='list'?sameList(u,q.ans):sameSet(u,q.ans);}
+    if(ok)okc++;
+    const box=$('#q_'+q.id);box.classList.toggle('ok',ok);box.classList.toggle('bad',!ok);
+    $('.res',box).innerHTML=ok?'<span class="mark-ok">✓ Correcto</span>':`<span class="mark-bad">✗</span> Era: <span class="mono">${Array.isArray(q.ans)?q.ans.join(', '):q.ans}</span>`;
+  }
+  $('#pBody .eyebrow').textContent=`Paso 4 de 4 · Recorridos y medidas · ${okc}/${P.qs.length} correctas`;
+};
+
+/* ===================== SERIES (práctica) ===================== */
+const PR=primesN(40);
+const SB=[
+  {w:'los números naturales',f:'n',g:n=>n,atom:true},
+  {w:'los números pares',f:'2n',g:n=>2*n},
+  {w:'los números impares',f:'2n − 1',g:n=>2*n-1,sum:true},
+  {w:'los múltiplos de K',f:'Kn',g:(n,K)=>K*n,k:[3,4,5,6,7]},
+  {w:'los cuadrados perfectos',f:'n²',g:n=>n*n,pow:true},
+  {w:'los cubos perfectos',f:'n³',g:n=>n**3,pow:true},
+  {w:'los números primos',f:'pₙ',g:n=>PR[n-1],atom:true},
+  {w:'las potencias de 2',f:'2ⁿ',g:n=>2**n,pow:true},
+  {w:'los números triangulares',f:'n(n + 1)/2',g:n=>n*(n+1)/2,sum:true},
+];
+const SOPS=['id','mas','menos','doble','cuad','desde','altneg','altpos'];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function mkItem(b,bk,op,ok){
+  const bw=b.w.replace('K',bk),bf=b.f.replace('K',bk),bg=n=>b.g(n,bk);
+  const wrap=b.sum?`(${bf})`:bf;
+  let w,f,g,how;
+  if(op==='id'){w=bw;f=bf;g=bg;how='No le hacen nada más.';}
+  else if(op==='mas'){w=`${bw} más ${ok}`;f=`${bf} + ${ok}`;g=n=>bg(n)+ok;how=`"más ${ok}" → + ${ok}.`;}
+  else if(op==='menos'){w=`${bw} menos ${ok}`;f=`${bf} − ${ok}`;g=n=>bg(n)-ok;how=`"menos ${ok}" → − ${ok}.`;}
+  else if(op==='doble'){w=`el doble de ${bw}`;f=bf==='n'?'2n':(b.atom||b.pow)?`2·${bf}`:`2·(${bf})`;g=n=>2*bg(n);how='"el doble de" → 2 · (base).';}
+  else if(op==='cuad'){w=`${bw} elevados al cuadrado`;f=b.atom?`${bf}²`:`(${bf})²`;g=n=>bg(n)**2;how='"al cuadrado" → (base)².';}
+  else if(op==='desde'){w=`${ok} menos ${bw}`;f=`${ok} − ${wrap}`;g=n=>ok-bg(n);how=`"${ok} menos …" → ${ok} − (base).`;}
+  else if(op==='altneg'){w=`${bw} con signo alternado, empezando en negativo`;f=`(−1)ⁿ · ${wrap}`;g=n=>(n%2?-1:1)*bg(n);how='Signo alternado empezando negativo → (−1)ⁿ, porque con n = 1 da −1.';}
+  else{w=`${bw} con signo alternado, empezando en positivo`;f=`(−1)ⁿ⁺¹ · ${wrap}`;g=n=>(n%2?1:-1)*bg(n);how='Signo alternado empezando positivo → (−1)ⁿ⁺¹, porque con n = 1 da (−1)² = +1.';}
+  return {w:cap(w),f:`aₙ = ${f}, n ≥ 1`,terms:m=>Array.from({length:m},(_,i)=>g(i+1)),how:`Base: "${bw}" → ${bf}. ${how}`};
+}
+function mkRec(type,s,k){
+  const it=(first,step)=>m=>{const r=[first];while(r.length<m)r.push(step(r[r.length-1]));return r.slice(0,m);};
+  const how='Habla del término anterior → fórmula recursiva: se da a₁ y la regla usa aₙ₋₁.';
+  if(type==='dob')return {w:`Cada término es el doble del anterior, empezando en ${s}`,f:`a₁ = ${s}, aₙ = 2·aₙ₋₁, n ≥ 2`,terms:it(s,x=>2*x),how};
+  if(type==='sum')return {w:`Cada término es el anterior más ${k}, empezando en ${s}`,f:`a₁ = ${s}, aₙ = aₙ₋₁ + ${k}, n ≥ 2`,terms:it(s,x=>x+k),how};
+  if(type==='tri')return {w:`Cada término es el triple del anterior menos ${k}, empezando en ${s}`,f:`a₁ = ${s}, aₙ = 3·aₙ₋₁ − ${k}, n ≥ 2`,terms:it(s,x=>3*x-k),how};
+  return {w:`Cada término es la suma de los dos anteriores, empezando en ${s} y ${k}`,f:`a₁ = ${s}, a₂ = ${k}, aₙ = aₙ₋₁ + aₙ₋₂, n ≥ 3`,terms:m=>{const r=[s,k];while(r.length<m)r.push(r[r.length-1]+r[r.length-2]);return r.slice(0,m);},how:'Habla de los dos anteriores → recursiva tipo Fibonacci: se dan a₁ y a₂.'};
+}
+const S={item:null,opts:[],answered:false,ok:0,tot:0};
+function sNew(){
+  let item,cands=[];
+  if(Math.random()<0.2){
+    const type=pick(['dob','sum','tri','fib']),s=rnd(1,5);let k=rnd(2,6);if(k===s)k++;
+    item=mkRec(type,s,k);
+    cands=shuffle(['dob','sum','tri','fib'].filter(t=>t!==type).map(t=>mkRec(t,s,k))).concat([mkRec(type,k,s)]);
+  }else{
+    const b=pick(SB),bk=b.k?pick(b.k):null;
+    const ops=SOPS.filter(o=>!(o==='cuad'&&b.pow));
+    const op=pick(ops),ok=op==='desde'?pick([50,60,100]):rnd(1,5);
+    item=mkItem(b,bk,op,ok);
+    const near=[];
+    if(op==='altneg')near.push(mkItem(b,bk,'altpos',ok));
+    if(op==='altpos')near.push(mkItem(b,bk,'altneg',ok));
+    if(op==='mas')near.push(mkItem(b,bk,'menos',ok));
+    if(op==='menos')near.push(mkItem(b,bk,'mas',ok));
+    if(b.k)near.push(mkItem(b,b.k.find(x=>x!==bk),op,ok));
+    const others=shuffle(ops.filter(o=>o!==op).map(o=>mkItem(b,bk,o,ok)).concat(shuffle(SB.filter(x=>x!==b)).slice(0,3).filter(x=>!(op==='cuad'&&x.pow)).map(x=>mkItem(x,x.k?pick(x.k):null,op,ok))));
+    cands=near.concat(others);
+  }
+  const seen=new Set([item.f]),opts=[item];
+  for(const c of cands){if(opts.length>=4)break;if(!seen.has(c.f)){seen.add(c.f);opts.push(c);}}
+  S.item=item;S.opts=shuffle(opts);S.answered=false;
+  $('#sBody').innerHTML=`<p class="statement">«${esc(item.w)}»</p>
+    <div class="lbl">¿Cuál es la fórmula?</div>
+    <div class="choices" style="flex-direction:column;align-items:stretch">${S.opts.map((o,i)=>`<label class="choice"><input type="radio" name="sOpt" value="${i}"><span class="mono">${esc(o.f)}</span></label>`).join('')}</div>
+    <div class="field"><label for="sTerms">Primeros 6 términos (n = 1 a 6)</label><input id="sTerms" class="mono wide" data-enter="sCheck" placeholder="ej: 3, 4, 6, 8, 12, 14"></div>
+    <div class="actions"><button class="btn primary" id="sGo" data-act="sCheck">Revisar</button><button class="btn ghost" data-act="sNew">Otra</button></div>
+    <div id="sFb"></div>`;
+  sStats();
+}
+function sStats(){$('#sStats').innerHTML=`Aciertos <b>${S.ok}/${S.tot}</b>`;}
+ACT.sNew=()=>sNew();
+ACT.sCheck=()=>{
+  if(S.answered){sNew();return;}
+  const sel=$('input[name="sOpt"]:checked');
+  if(!sel){$('#sFb').innerHTML='<div class="fb bad">Escoja una fórmula.</div>';return;}
+  const o=S.opts[Number(sel.value)],okF=o===S.item;
+  const correct=S.item.terms(6),u=parseList($('#sTerms').value),okT=sameList(u,correct);
+  S.tot++;if(okF&&okT)S.ok++;S.answered=true;
+  const nlist=t=>t.map((x,i)=>`n=${i+1} → ${x}`).join(' · ');
+  $('#sFb').innerHTML=`<div class="fb ${okF&&okT?'ok':'bad'}"><div class="verdict">${okF&&okT?'¡Correcto!':okF?'Fórmula bien, términos no':'Todavía no'}</div>
+    <p>${esc(S.item.how)}</p>
+    <p>Fórmula: <span class="mono">${esc(S.item.f)}</span></p>
+    <p>Da: <span class="mono">${nlist(correct)}</span></p>
+    ${okF?'':`<p>La que usted escogió (<span class="mono">${esc(o.f)}</span>) da: <span class="mono">${o.terms(6).join(', ')}</span>. Por eso se verifica con n = 1, 2, 3.</p>`}
+    ${okT?'':`<p>Términos: ${listDiff(u,correct)}</p>`}</div>`;
+  $('#sGo').textContent='Siguiente →';sStats();
+};
+sNew();
+
+/* ===================== PYTHON ===================== */
+const SYNTAX=[
+  ['Variable','int x = 5;','x = 5','Sin tipo y sin punto y coma.'],
+  ['Nulo','null','None','Con mayúscula.'],
+  ['Booleanos','true / false','True / False','Con mayúscula.'],
+  ['Bloques','{ ... }','dos puntos : y sangría de 4 espacios','La sangría ES la llave.'],
+  ['if','if (x < 5) { }','if x < 5:','Sin paréntesis obligatorios.'],
+  ['else if','else if','elif','Una sola palabra.'],
+  ['Y / O / NO','&& || !','and or not',''],
+  ['¿Es nulo?','nodo == null','nodo is None','Y su contrario: nodo is not None'],
+  ['while','while (n != null)','while n is not None:',''],
+  ['for','for (i=0;i<5;i++)','for i in range(5):','Da 0, 1, 2, 3, 4.'],
+  ['for sobre lista','for (x : lista)','for x in [3, 1, 4]:',''],
+  ['Función','int suma(a,b){ return a+b; }','def suma(a, b):\n    return a + b',''],
+  ['Clase','class Nodo { }','class Nodo:',''],
+  ['Constructor','Nodo(int v) { }','def __init__(self, v):','Dos guiones bajos a cada lado.'],
+  ['this','this.valor','self.valor','self va de primer parámetro en todo método.'],
+  ['Crear objeto','new Nodo(5)','Nodo(5)','Sin new.'],
+  ['Lista','ArrayList','l = []','l.append(x) agrega · l.pop(0) saca el primero · len(l) tamaño'],
+  ['Tupla','—','t = (1, 3, 25)','t[0] es 1. Se compara campo por campo.'],
+  ['Imprimir','System.out.println(x)','print(x)',''],
+  ['Comentario','// texto','# texto',''],
+  ['Máximo','Math.max(a,b)','max(a, b)','También abs(x).'],
+];
+$('#syntaxTable').innerHTML=`<thead><tr><th>Concepto</th><th>Java / C</th><th>Python</th><th>Nota</th></tr></thead><tbody>${SYNTAX.map(r=>`<tr><td><b>${r[0]}</b></td><td><code>${esc(r[1])}</code></td><td><code style="white-space:pre">${esc(r[2])}</code></td><td class="small">${esc(r[3])}</td></tr>`).join('')}</tbody>`;
+
+const PYEX=[
+{t:'1. La clase Nodo',goal:'Un nodo guarda un valor y dos referencias: hijo izquierdo y derecho.',code:
+`⟦class⟧ Nodo:
+    def ⟦__init__⟧(⟦self⟧, valor):
+        self.valor = valor
+        self.izq = ⟦None⟧
+        self.der = None
+
+raiz = ⟦Nodo(10)⟧     # crear un nodo con valor 10`,
+exp:['<code>class Nodo:</code> abre la clase. Note los dos puntos.','<code>__init__</code> es el constructor: se ejecuta al hacer <code>Nodo(10)</code>.','<code>self</code> es el objeto mismo (como <code>this</code>). Siempre es el primer parámetro.','<code>None</code> = no hay hijo todavía.','Para crear un objeto no se usa <code>new</code>: solo <code>Nodo(10)</code>.']},
+{t:'2. Insertar en un BST',goal:'Bajar por la izquierda si es menor, por la derecha si es mayor; cuando se llega a un hueco, se crea el nodo.',code:
+`def insertar(nodo, valor):
+    if nodo ⟦is None|==None⟧:
+        return ⟦Nodo(valor)⟧
+    if valor ⟦<⟧ nodo.valor:
+        nodo.izq = ⟦insertar(nodo.izq, valor)⟧
+    ⟦elif⟧ valor > nodo.valor:
+        nodo.der = insertar(nodo.der, valor)
+    ⟦return nodo⟧
+
+raiz = None
+⟦for⟧ x ⟦in⟧ [50, 30, 70, 20]:
+    raiz = ⟦insertar(raiz, x)⟧`,
+exp:['El caso base: si llegué a un hueco (<code>None</code>), creo y devuelvo el nodo nuevo.','<code>nodo.izq = insertar(nodo.izq, valor)</code>: la llamada devuelve el subárbol ya modificado y lo vuelvo a enganchar. Ese patrón "reasignar lo que devuelve la recursión" es la clave de todo el código de árboles.','<code>return nodo</code> al final: devuelvo este mismo nodo para que el padre lo enganche.','Por eso afuera se escribe <code>raiz = insertar(raiz, x)</code>: la primera vez la raíz cambia de <code>None</code> a un nodo.']},
+{t:'3. Los tres recorridos',goal:'Lo único que cambia es en qué momento se agrega el valor a la lista.',code:
+`def inorden(nodo, res):
+    if nodo is not None:
+        inorden(⟦nodo.izq⟧, res)
+        res.⟦append⟧(nodo.valor)
+        inorden(⟦nodo.der⟧, res)
+
+def preorden(nodo, res):
+    if nodo is not None:
+        ⟦res.append(nodo.valor)⟧
+        preorden(nodo.izq, res)
+        preorden(nodo.der, res)
+
+def postorden(nodo, res):
+    if nodo is not None:
+        postorden(nodo.izq, res)
+        postorden(nodo.der, res)
+        ⟦res.append(nodo.valor)⟧
+
+lista = []
+inorden(raiz, lista)
+⟦print⟧(lista)`,
+exp:['<b>In</b>orden: el valor va <b>en medio</b> (izq, raíz, der).','<b>Pre</b>orden: el valor va <b>antes</b> (raíz, izq, der).','<b>Post</b>orden: el valor va <b>después</b> (izq, der, raíz).','<code>res</code> es una lista que se va llenando; se crea vacía afuera con <code>[]</code>.']},
+{t:'4. Altura, buscar y profundidad',goal:'Altura recursiva; buscar como en BST; profundidad contando pasos desde la raíz.',code:
+`def altura(nodo):
+    if nodo is None:
+        return ⟦-1⟧          # árbol vacío; así una hoja da 0
+    return 1 + ⟦max⟧(altura(nodo.izq), altura(nodo.der))
+
+def buscar(nodo, valor):
+    if nodo is None:
+        return ⟦False⟧
+    if valor ⟦==⟧ nodo.valor:
+        return True
+    if valor < nodo.valor:
+        return ⟦buscar(nodo.izq, valor)⟧
+    return buscar(nodo.der, valor)
+
+def profundidad(nodo, valor):
+    d = 0
+    ⟦while⟧ nodo is not None:
+        if valor == nodo.valor:
+            return d
+        if valor < nodo.valor:
+            nodo = nodo.izq
+        else:
+            nodo = ⟦nodo.der⟧
+        d ⟦+=⟧ 1
+    return -1               # no está`,
+exp:['Con <code>None → -1</code>, una hoja da <code>1 + max(-1, -1) = 0</code>: coincide con "hoja = altura 0".','<code>buscar</code> devuelve <code>True</code>/<code>False</code> (con mayúscula).','<code>profundidad</code> usa un ciclo: cada vez que baja un nivel suma 1. La raíz da 0.','<code>d += 1</code> es lo mismo que <code>d = d + 1</code>. En Python no existe <code>d++</code>.']},
+{t:'5. Recorrido en anchura (BFS)',goal:'Una cola: saco el primero, lo anoto y meto sus hijos al final.',code:
+`def anchura(raiz):
+    res = ⟦[]⟧
+    if raiz is None:
+        return res
+    cola = [⟦raiz⟧]
+    while len(cola) > 0:
+        actual = cola.⟦pop(0)⟧
+        res.append(actual.valor)
+        if actual.izq is not None:
+            cola.⟦append(actual.izq)⟧
+        if actual.der is not None:
+            cola.append(actual.der)
+    return res`,
+exp:['La lista <code>cola</code> funciona como cola: <code>pop(0)</code> saca el primero, <code>append</code> mete al final.','Primero el hijo izquierdo y luego el derecho: así cada nivel sale de izquierda a derecha.','No es recursivo: es un <code>while</code>.']},
+{t:'6. Eliminar en BST con predecesor',goal:'Tres casos: hoja, un hijo, dos hijos (predecesor = máximo del subárbol izquierdo).',code:
+`def maximo(nodo):
+    while nodo.⟦der⟧ is not None:
+        nodo = nodo.der
+    return nodo
+
+def eliminar(nodo, valor):
+    if nodo is None:
+        return None
+    if valor < nodo.valor:
+        nodo.izq = eliminar(nodo.izq, valor)
+    elif valor > nodo.valor:
+        nodo.der = eliminar(nodo.der, valor)
+    else:
+        # hoja o un solo hijo
+        if nodo.izq is None:
+            return ⟦nodo.der⟧
+        if nodo.der is None:
+            return ⟦nodo.izq⟧
+        # dos hijos -> predecesor
+        pred = maximo(⟦nodo.izq⟧)
+        nodo.valor = ⟦pred.valor⟧
+        nodo.izq = eliminar(nodo.izq, ⟦pred.valor⟧)
+    return nodo`,
+exp:['<code>maximo</code>: todo a la derecha. El predecesor es <code>maximo(nodo.izq)</code>: un paso a la izquierda y luego todo a la derecha.','Si no tiene hijo izquierdo, devuelvo el derecho (que puede ser <code>None</code> si era hoja). Así un solo <code>if</code> cubre hoja y un hijo.','Con dos hijos: copio el valor del predecesor en este nodo y luego borro el predecesor del subárbol izquierdo.']},
+{t:'7. AVL: altura guardada y FB',goal:'Cada nodo guarda su altura (agregue self.altura = 0 en el constructor).',code:
+`def h(nodo):
+    if nodo is None:
+        return -1
+    return nodo.⟦altura⟧
+
+def actualizar(nodo):
+    nodo.altura = 1 + max(⟦h(nodo.izq)⟧, h(nodo.der))
+
+def fb(nodo):
+    return ⟦h(nodo.izq) - h(nodo.der)⟧`,
+exp:['<code>h</code> evita errores con <code>None</code>: un hijo vacío tiene altura -1.','<code>actualizar</code> se llama cada vez que cambian los hijos de un nodo.','<code>fb</code> positivo = pesa a la izquierda; negativo = pesa a la derecha.']},
+{t:'8. Rotaciones',goal:'Rotar a la derecha: el hijo izquierdo sube; su subárbol derecho (T2) pasa a ser el izquierdo del que baja.',code:
+`def rotar_derecha(y):
+    x = y.⟦izq⟧
+    t2 = x.der
+    x.der = ⟦y⟧
+    y.izq = ⟦t2⟧
+    actualizar(⟦y⟧)      # primero el que quedó abajo
+    actualizar(x)
+    return ⟦x⟧
+
+def rotar_izquierda(x):
+    y = x.der
+    t2 = y.izq
+    y.izq = ⟦x⟧
+    x.der = ⟦t2⟧
+    actualizar(x)
+    actualizar(y)
+    return y`,
+exp:['Dibújelo: y arriba, x su hijo izquierdo, t2 el hijo derecho de x. Después: x arriba, y su hijo derecho, t2 pasa a ser hijo izquierdo de y.','Se actualiza primero el que quedó <b>abajo</b>, porque la altura del de arriba depende de él.','Se devuelve la nueva raíz del subárbol para que el padre la enganche.','<code>rotar_izquierda</code> es el espejo exacto: cambie izq↔der.']},
+{t:'9. Balancear e insertar en AVL',goal:'Igual que insertar en BST, pero al volver de la recursión se balancea cada nodo del camino.',code:
+`def balancear(nodo):
+    actualizar(nodo)
+    b = fb(nodo)
+    if b ⟦> 1⟧:                       # pesa a la izquierda
+        if fb(nodo.izq) ⟦< 0⟧:        # zig-zag: caso LR
+            nodo.izq = ⟦rotar_izquierda(nodo.izq)⟧
+        return ⟦rotar_derecha(nodo)⟧  # caso LL
+    if b < -1:                        # pesa a la derecha
+        if fb(nodo.der) > 0:          # zig-zag: caso RL
+            nodo.der = ⟦rotar_derecha(nodo.der)⟧
+        return ⟦rotar_izquierda(nodo)⟧ # caso RR
+    return nodo
+
+def insertar_avl(nodo, valor):
+    if nodo is None:
+        return Nodo(valor)
+    if valor < nodo.valor:
+        nodo.izq = insertar_avl(nodo.izq, valor)
+    elif valor > nodo.valor:
+        nodo.der = insertar_avl(nodo.der, valor)
+    else:
+        return nodo        # repetido
+    return ⟦balancear(nodo)⟧`,
+exp:['Los 4 casos en 8 líneas: si es zig-zag primero se endereza el hijo, y luego se hace la rotación simple.','<code>insertar_avl</code> es el BST del ejercicio 2, solo cambia la última línea: <code>return balancear(nodo)</code>.','Eliminar en AVL es igual: el <code>eliminar</code> del ejercicio 6 con <code>return balancear(nodo)</code> al final.']},
+{t:'10. Una clase Árbol que envuelve todo',goal:'Muchos profes lo piden como clase con métodos. Se guarda la raíz y se llama a las funciones.',code:
+`class ArbolAVL:
+    def __init__(self):
+        self.raiz = ⟦None⟧
+
+    def insertar(⟦self⟧, valor):
+        self.raiz = insertar_avl(⟦self.raiz⟧, valor)
+
+    def eliminar(self, valor):
+        self.raiz = eliminar_avl(self.raiz, valor)
+
+arbol = ⟦ArbolAVL()⟧
+for x in [10, 20, 30]:
+    arbol.⟦insertar(x)⟧`,
+exp:['El árbol solo guarda la raíz.','Al llamar <code>arbol.insertar(x)</code>, Python pasa <code>arbol</code> como <code>self</code> automáticamente.','<code>self.raiz = ...</code> es necesario porque una rotación en la raíz cambia cuál nodo es la raíz.']},
+{t:'11. Nodos con tuplas y prioridad (punto 2 del parcial)',goal:'Orden: magnitud (mayor primero), luego prioridad (menor primero), luego id.',code:
+`class Evento:
+    def __init__(self, prioridad, magnitud, id):
+        self.prioridad = prioridad
+        self.magnitud = magnitud
+        self.id = id
+
+    def clave(self):
+        return (⟦-self.magnitud⟧, self.prioridad, ⟦self.id⟧)
+
+def insertar(nodo, ev):
+    if nodo is None:
+        return Nodo(ev)
+    if ev.clave() ⟦<⟧ nodo.valor.clave():
+        nodo.izq = insertar(nodo.izq, ev)
+    else:
+        nodo.der = insertar(nodo.der, ev)
+    return nodo
+
+e = ⟦Evento(1, 3, 25)⟧     # prioridad=1, magnitud=3, id=25`,
+exp:['El nodo guarda el evento completo en <code>valor</code>; se compara por <code>clave()</code>.','<code>-self.magnitud</code>: como el mayor va primero, se niega para que quede como el más pequeño.','El id al final desempata, y como es único, nunca hay dos claves iguales.','Alternativa elegante: definir <code>def __lt__(self, otro): return self.clave() &lt; otro.clave()</code>. Así el <code>insertar</code> normal con <code>valor &lt; nodo.valor</code> funciona sin cambios.']},
+];
+function renderPyEx(){
+  $('#pyEx').innerHTML=PYEX.map((ex,i)=>{
+    let bi=0;
+    const html=ex.code.split(/(⟦[^⟧]*⟧)/).map(part=>{
+      const m=part.match(/^⟦([^⟧]*)⟧$/);
+      if(!m)return esc(part);
+      const alts=m[1].split('|');const w=Math.max(...alts.map(a=>a.length))+2;
+      return `<input class="blank" id="b${i}_${bi++}" data-ans="${esc(m[1])}" size="${w}" aria-label="espacio en blanco" autocomplete="off" spellcheck="false">`;
+    }).join('');
+    return `<div class="card" id="ex${i}"><h3>${ex.t}</h3><p class="muted">${ex.goal}</p><pre class="code">${html}</pre>
+      <div class="actions"><button class="btn primary" data-act="pyCheck" data-i="${i}">Revisar</button><button class="btn" data-act="pyShow" data-i="${i}">Mostrar respuestas</button><button class="btn ghost" data-act="pyClear" data-i="${i}">Limpiar</button><span class="small" id="pyRes${i}"></span></div>
+      <details><summary>Explicación</summary><ul>${ex.exp.map(x=>`<li>${x}</li>`).join('')}</ul></details></div>`;
+  }).join('');
+}
+renderPyEx();
+const normPy=s=>s.replace(/\s+/g,'').replace(/"/g,"'");
+ACT.pyCheck=b=>{
+  const box=$('#ex'+b.dataset.i);let ok=0,tot=0;
+  $$('input.blank',box).forEach(inp=>{tot++;const good=inp.dataset.ans.split('|').some(a=>normPy(a)===normPy(inp.value));if(good)ok++;inp.classList.toggle('okb',good);inp.classList.toggle('badb',!good);});
+  $('#pyRes'+b.dataset.i).innerHTML=ok===tot?`<span class="mark-ok">✓ ${ok}/${tot} ¡Todo bien!</span>`:`<span class="mark-bad">${ok}/${tot}</span> — los rojos están mal`;
+};
+ACT.pyShow=b=>{$$('input.blank',$('#ex'+b.dataset.i)).forEach(inp=>{inp.value=inp.dataset.ans.split('|')[0];inp.classList.remove('badb');inp.classList.add('okb');});};
+ACT.pyClear=b=>{$$('input.blank',$('#ex'+b.dataset.i)).forEach(inp=>{inp.value='';inp.classList.remove('okb','badb');});$('#pyRes'+b.dataset.i).textContent='';};
+
+/* ===================== PYTHON DESDE CERO ===================== */
+function fnBody(code,name){
+  const lines=code.split('\n');const i=lines.findIndex(l=>new RegExp('^\\s*def\\s+'+name+'\\s*\\(').test(l));
+  if(i<0)return '';
+  const ind=lines[i].match(/^ */)[0].length;const out=[];
+  for(let j=i+1;j<lines.length;j++){const l=lines[j];if(l.trim()===''){out.push(l);continue;}if(l.match(/^ */)[0].length<=ind)break;out.push(l);}
+  return out.join('\n');
+}
+const stripComments=c=>c.replace(/\t/g,'    ').split('\n').map(l=>l.replace(/#.*$/,'')).join('\n');
+function pySyntax(raw){
+  const lines=raw.replace(/\t/g,'    ').split('\n'),S=l=>l.replace(/#.*$/,'').replace(/\s+$/,'');
+  const res=[],add=(ok,label,lns)=>res.push({ok,label,detail:lns.length?'Líneas: '+lns.slice(0,10).join(', '):''});
+  const where=p=>lines.map((l,i)=>p(S(l))?i+1:0).filter(Boolean);
+  add(...(a=>[!a.length,'Las líneas de if / elif / else / for / while / def / class terminan en ":"',a])(where(l=>/^\s*(if|elif|else|for|while|def|class|try|except|finally|with)\b/.test(l)&&!/:$/.test(l))));
+  const ind=[];
+  for(let i=0;i<lines.length;i++){
+    const l=S(lines[i]);if(!/:$/.test(l))continue;
+    const me=l.match(/^ */)[0].length;
+    let j=i+1;while(j<lines.length&&S(lines[j]).trim()==='')j++;
+    if(j>=lines.length||S(lines[j]).match(/^ */)[0].length<=me)ind.push(i+1);
+  }
+  add(!ind.length,'Después de ":" la línea siguiente tiene más sangría',ind);
+  add(...(a=>[!a.length,'Sangría en múltiplos de 4 espacios',a])(where(l=>{const m=l.match(/^( *)\S/);return !!m&&m[1].length%4!==0;})));
+  add(...(a=>[!a.length,'Usa None (no null)',a])(where(l=>/\b(null|NULL|nil)\b/.test(l))));
+  add(...(a=>[!a.length,'True / False con mayúscula',a])(where(l=>/\b(true|false)\b/.test(l))));
+  add(...(a=>[!a.length,'Usa self (no this)',a])(where(l=>/\bthis\b/.test(l))));
+  add(...(a=>[!a.length,'Crea objetos sin new',a])(where(l=>/\bnew\s+[A-Za-z]/.test(l))));
+  add(...(a=>[!a.length,'Usa elif (no else if)',a])(where(l=>/\belse\s+if\b/.test(l))));
+  add(...(a=>[!a.length,'Usa and / or / not (no && || !)',a])(where(l=>/&&|\|\||(^|[^!=<>])!(?!=)/.test(l))));
+  add(...(a=>[!a.length,'Sin llaves { }',a])(where(l=>/[{}]/.test(l))));
+  add(...(a=>[!a.length,'Sin punto y coma al final',a])(where(l=>/;\s*$/.test(l))));
+  add(...(a=>[!a.length,'Sin ++ ni -- (use += 1)',a])(where(l=>/\+\+|\w--/.test(l))));
+  const noSelf=[];let inClass=false;
+  lines.forEach((l0,i)=>{const l=S(l0);if(/^class\b/.test(l)){inClass=true;return;}if(l.trim()&&!/^\s/.test(l))inClass=false;
+    const m=l.match(/^\s+def\s+\w+\s*\(\s*([A-Za-z_]\w*)?/);if(inClass&&m&&m[1]!=='self')noSelf.push(i+1);});
+  add(!noSelf.length,'Los métodos de una clase reciben self de primero',noSelf);
+  return res;
+}
+const R=(re,label,hint)=>({label,hint,test:c=>re.test(c)});
+const F=(fn,label,hint)=>({label,hint,test:fn});
+const order3=(body,a,b,c)=>{const i=body.search(a),j=body.search(b),k=body.search(c);return i>=0&&j>=0&&k>=0&&i<j&&j<k;};
+const SOL_NODO=`class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izq = None
+        self.der = None`;
+const FREE=[
+{id:'f1',t:'1. Clase Nodo + insertar en BST',st:'Escriba la clase <code>Nodo</code> (valor, izq, der) y la función recursiva <code>insertar(nodo, valor)</code>, que devuelve la raíz. Después inserte 50, 30 y 70 empezando con <code>raiz = None</code>.',
+sol:SOL_NODO+`
+
+
+def insertar(nodo, valor):
+    if nodo is None:
+        return Nodo(valor)
+    if valor < nodo.valor:
+        nodo.izq = insertar(nodo.izq, valor)
+    elif valor > nodo.valor:
+        nodo.der = insertar(nodo.der, valor)
+    return nodo
+
+
+raiz = None
+for x in [50, 30, 70]:
+    raiz = insertar(raiz, x)`,
+checks:[R(/class\s+Nodo\s*:/,'Define la clase: class Nodo:'),R(/def\s+__init__\s*\(\s*self\s*,/,'Constructor: def __init__(self, valor):'),R(/self\.valor\s*=/,'Guarda el valor en self.valor'),R(/self\.izq\s*=\s*None/,'self.izq empieza en None'),R(/self\.der\s*=\s*None/,'self.der empieza en None'),
+R(/def\s+insertar\s*\(\s*\w+\s*,\s*\w+\s*\)\s*:/,'Función def insertar(nodo, valor):'),R(/if\s+\w+\s+is\s+None\s*:|if\s+\w+\s*==\s*None\s*:|if\s+not\s+\w+\s*:/,'Caso base: si el nodo es None…'),R(/return\s+Nodo\s*\(\s*\w+\s*\)/,'…crea y devuelve Nodo(valor)'),
+R(/\w+\.izq\s*=\s*insertar\s*\(\s*\w+\.izq/,'Reengancha: nodo.izq = insertar(nodo.izq, valor)','Si solo escribe insertar(nodo.izq, valor) sin asignar, el nodo nuevo se pierde.'),R(/\w+\.der\s*=\s*insertar\s*\(\s*\w+\.der/,'Reengancha: nodo.der = insertar(nodo.der, valor)'),
+R(/^ {4}return\s+[a-z_]\w*\s*$/m,'Al final de la función: return nodo'),R(/(\w+)\s*=\s*insertar\s*\(\s*\1\s*,/,'Afuera: raiz = insertar(raiz, x)','La raíz cambia la primera vez (de None a un nodo), por eso hay que reasignarla.')],
+exp:['El caso base crea el nodo cuando se llega a un hueco.','<code>nodo.izq = insertar(nodo.izq, valor)</code>: la recursión devuelve el subárbol modificado y se vuelve a enganchar.','<code>return nodo</code> devuelve este mismo nodo para que el padre lo enganche.']},
+{id:'f2',t:'2. Recorridos + altura',st:'Escriba <code>inorden(nodo, res)</code>, <code>preorden(nodo, res)</code> y <code>postorden(nodo, res)</code>, que van llenando la lista <code>res</code>, y <code>altura(nodo)</code> con árbol vacío = −1.',
+sol:`def inorden(nodo, res):
+    if nodo is not None:
+        inorden(nodo.izq, res)
+        res.append(nodo.valor)
+        inorden(nodo.der, res)
+
+
+def preorden(nodo, res):
+    if nodo is not None:
+        res.append(nodo.valor)
+        preorden(nodo.izq, res)
+        preorden(nodo.der, res)
+
+
+def postorden(nodo, res):
+    if nodo is not None:
+        postorden(nodo.izq, res)
+        postorden(nodo.der, res)
+        res.append(nodo.valor)
+
+
+def altura(nodo):
+    if nodo is None:
+        return -1
+    return 1 + max(altura(nodo.izq), altura(nodo.der))`,
+checks:[R(/def\s+inorden\s*\(/,'Define inorden'),R(/def\s+preorden\s*\(/,'Define preorden'),R(/def\s+postorden\s*\(/,'Define postorden'),R(/\.append\s*\(\s*\w+\.valor\s*\)/,'Agrega con res.append(nodo.valor)'),
+F(c=>order3(fnBody(c,'inorden'),/inorden\s*\(\s*\w+\.izq/,/\.append\s*\(/,/inorden\s*\(\s*\w+\.der/),'Inorden: izquierda → append → derecha'),
+F(c=>order3(fnBody(c,'preorden'),/\.append\s*\(/,/preorden\s*\(\s*\w+\.izq/,/preorden\s*\(\s*\w+\.der/),'Preorden: append → izquierda → derecha'),
+F(c=>order3(fnBody(c,'postorden'),/postorden\s*\(\s*\w+\.izq/,/postorden\s*\(\s*\w+\.der/,/\.append\s*\(/),'Postorden: izquierda → derecha → append'),
+R(/def\s+altura\s*\(/,'Define altura'),F(c=>/return\s+-\s*1/.test(fnBody(c,'altura')),'Árbol vacío: return -1'),F(c=>/1\s*\+\s*max\s*\(/.test(fnBody(c,'altura')),'return 1 + max(altura(izq), altura(der))')],
+exp:['Los tres recorridos son iguales: solo cambia dónde va el <code>append</code>.','Con None → −1, una hoja da 1 + max(−1, −1) = 0.']},
+{id:'f3',t:'3. Recorrido por anchura (BFS)',st:'Escriba <code>anchura(raiz)</code> que devuelva la lista de valores nivel por nivel, de izquierda a derecha, usando una lista como cola.',
+sol:`def anchura(raiz):
+    res = []
+    if raiz is None:
+        return res
+    cola = [raiz]
+    while len(cola) > 0:
+        actual = cola.pop(0)
+        res.append(actual.valor)
+        if actual.izq is not None:
+            cola.append(actual.izq)
+        if actual.der is not None:
+            cola.append(actual.der)
+    return res`,
+checks:[R(/def\s+anchura\s*\(/,'Define anchura(raiz)'),R(/\w+\s*=\s*\[\s*\]/,'Crea la lista de resultado vacía: res = []'),R(/\w+\s*=\s*\[\s*\w+\s*\]/,'Crea la cola con la raíz adentro: cola = [raiz]'),R(/while\s+(len\s*\(\s*\w+\s*\)\s*>\s*0|len\s*\(\s*\w+\s*\)|\w+)\s*:/,'Ciclo while mientras la cola tenga algo'),
+R(/\.pop\s*\(\s*0\s*\)/,'Saca el primero con pop(0)','pop() sin el 0 saca el último: eso sería una pila, no una cola.'),R(/\.append\s*\(\s*\w+\.valor\s*\)/,'Anota el valor: res.append(actual.valor)'),
+F(c=>{const b=fnBody(c,'anchura');const i=b.search(/\.append\s*\(\s*\w+\.izq\s*\)/),j=b.search(/\.append\s*\(\s*\w+\.der\s*\)/);return i>=0&&j>=0&&i<j;},'Mete a la cola primero el hijo izquierdo y luego el derecho'),R(/^ {4}return\s+\w+\s*$/m,'Devuelve la lista al final')],
+exp:['Una cola: se saca por el frente con <code>pop(0)</code> y se mete al final con <code>append</code>.','Primero el hijo izquierdo para que cada nivel salga de izquierda a derecha.']},
+{id:'f4',t:'4. Eliminar con predecesor',st:'Escriba <code>maximo(nodo)</code> y <code>eliminar(nodo, valor)</code> para un BST. Con dos hijos, use el <b>predecesor</b> (el mayor del subárbol izquierdo).',
+sol:`def maximo(nodo):
+    while nodo.der is not None:
+        nodo = nodo.der
+    return nodo
+
+
+def eliminar(nodo, valor):
+    if nodo is None:
+        return None
+    if valor < nodo.valor:
+        nodo.izq = eliminar(nodo.izq, valor)
+    elif valor > nodo.valor:
+        nodo.der = eliminar(nodo.der, valor)
+    else:
+        if nodo.izq is None:
+            return nodo.der
+        if nodo.der is None:
+            return nodo.izq
+        pred = maximo(nodo.izq)
+        nodo.valor = pred.valor
+        nodo.izq = eliminar(nodo.izq, pred.valor)
+    return nodo`,
+checks:[R(/def\s+maximo\s*\(/,'Define maximo'),R(/while\s+\w+\.der\s+is\s+not\s+None\s*:|while\s+\w+\.der\s*!=\s*None\s*:|while\s+\w+\.der\s*:/,'maximo baja todo a la derecha'),R(/def\s+eliminar\s*\(/,'Define eliminar'),
+R(/\.izq\s*=\s*eliminar\s*\(\s*\w+\.izq\s*,\s*\w+\s*\)/,'Si es menor, baja a la izquierda reenganchando'),R(/\.der\s*=\s*eliminar\s*\(\s*\w+\.der/,'Si es mayor, baja a la derecha reenganchando'),
+R(/return\s+\w+\.der\b/,'Sin hijo izquierdo → devuelve el derecho (cubre hoja y un hijo)'),R(/return\s+\w+\.izq\b/,'Sin hijo derecho → devuelve el izquierdo'),
+R(/maximo\s*\(\s*\w+\.izq\s*\)/,'Predecesor = maximo(nodo.izq)','Si puso minimo(nodo.der), ese es el sucesor: su profe usa predecesor.'),R(/\w+\.valor\s*=\s*\w+\.valor/,'Copia el valor: nodo.valor = pred.valor'),R(/\.izq\s*=\s*eliminar\s*\(\s*\w+\.izq\s*,\s*\w+\.valor\s*\)/,'Borra el predecesor de la izquierda: nodo.izq = eliminar(nodo.izq, pred.valor)'),R(/^ {4}return\s+[a-z_]\w*\s*$/m,'Al final: return nodo')],
+exp:['Hoja y un hijo se resuelven juntos: si no hay izquierdo, se devuelve el derecho (que puede ser None).','Con dos hijos se copia el predecesor y luego se borra el predecesor de su lugar original.']},
+{id:'f5',t:'5. Rotaciones (con altura guardada)',st:'Cada nodo tiene <code>self.altura</code>. Escriba <code>h(nodo)</code> (None → −1), <code>actualizar(nodo)</code>, <code>rotar_derecha(y)</code> y <code>rotar_izquierda(x)</code>. Cada rotación devuelve la nueva raíz del subárbol.',
+sol:`def h(nodo):
+    if nodo is None:
+        return -1
+    return nodo.altura
+
+
+def actualizar(nodo):
+    nodo.altura = 1 + max(h(nodo.izq), h(nodo.der))
+
+
+def rotar_derecha(y):
+    x = y.izq
+    t2 = x.der
+    x.der = y
+    y.izq = t2
+    actualizar(y)
+    actualizar(x)
+    return x
+
+
+def rotar_izquierda(x):
+    y = x.der
+    t2 = y.izq
+    y.izq = x
+    x.der = t2
+    actualizar(x)
+    actualizar(y)
+    return y`,
+checks:[R(/def\s+h\s*\(/,'Define h(nodo)'),F(c=>/return\s+-\s*1/.test(fnBody(c,'h')),'h: None devuelve -1'),R(/def\s+actualizar\s*\(/,'Define actualizar'),R(/\.altura\s*=\s*1\s*\+\s*max\s*\(/,'altura = 1 + max(h(izq), h(der))'),
+R(/def\s+rotar_derecha\s*\(/,'Define rotar_derecha'),F(c=>{const b=fnBody(c,'rotar_derecha');return /\w+\s*=\s*\w+\.izq/.test(b)&&/\w+\.der\s*=\s*\w+/.test(b)&&/\w+\.izq\s*=\s*\w+/.test(b);},'rotar_derecha: sube el hijo izquierdo y pasa su subárbol derecho (t2)'),
+F(c=>(fnBody(c,'rotar_derecha').match(/actualizar\s*\(/g)||[]).length>=2,'rotar_derecha actualiza las dos alturas'),F(c=>/return\s+\w+/.test(fnBody(c,'rotar_derecha')),'rotar_derecha devuelve la nueva raíz'),
+R(/def\s+rotar_izquierda\s*\(/,'Define rotar_izquierda'),F(c=>{const b=fnBody(c,'rotar_izquierda');return /\w+\s*=\s*\w+\.der/.test(b)&&/\w+\.izq\s*=\s*\w+/.test(b)&&/\w+\.der\s*=\s*\w+/.test(b);},'rotar_izquierda: espejo exacto (cambia izq ↔ der)'),
+F(c=>(fnBody(c,'rotar_izquierda').match(/actualizar\s*\(/g)||[]).length>=2,'rotar_izquierda actualiza las dos alturas'),F(c=>/return\s+\w+/.test(fnBody(c,'rotar_izquierda')),'rotar_izquierda devuelve la nueva raíz')],
+exp:['Rotar a la derecha: x = y.izq sube, y baja a la derecha de x, y el subárbol del medio t2 pasa a ser y.izq.','Primero se actualiza el que quedó abajo (y), después el de arriba (x), porque la altura de x depende de la de y.']},
+{id:'f6',t:'6. AVL completo',st:'Escriba todo el AVL: <code>Nodo</code> con <code>altura</code>, <code>h</code>, <code>actualizar</code>, <code>fb</code>, las dos rotaciones, <code>balancear</code> con los 4 casos e <code>insertar_avl</code>. Use esos nombres.',
+sol:`class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izq = None
+        self.der = None
+        self.altura = 0
+
+
+def h(nodo):
+    if nodo is None:
+        return -1
+    return nodo.altura
+
+
+def actualizar(nodo):
+    nodo.altura = 1 + max(h(nodo.izq), h(nodo.der))
+
+
+def fb(nodo):
+    return h(nodo.izq) - h(nodo.der)
+
+
+def rotar_derecha(y):
+    x = y.izq
+    t2 = x.der
+    x.der = y
+    y.izq = t2
+    actualizar(y)
+    actualizar(x)
+    return x
+
+
+def rotar_izquierda(x):
+    y = x.der
+    t2 = y.izq
+    y.izq = x
+    x.der = t2
+    actualizar(x)
+    actualizar(y)
+    return y
+
+
+def balancear(nodo):
+    actualizar(nodo)
+    b = fb(nodo)
+    if b > 1:
+        if fb(nodo.izq) < 0:
+            nodo.izq = rotar_izquierda(nodo.izq)
+        return rotar_derecha(nodo)
+    if b < -1:
+        if fb(nodo.der) > 0:
+            nodo.der = rotar_derecha(nodo.der)
+        return rotar_izquierda(nodo)
+    return nodo
+
+
+def insertar_avl(nodo, valor):
+    if nodo is None:
+        return Nodo(valor)
+    if valor < nodo.valor:
+        nodo.izq = insertar_avl(nodo.izq, valor)
+    elif valor > nodo.valor:
+        nodo.der = insertar_avl(nodo.der, valor)
+    else:
+        return nodo
+    return balancear(nodo)`,
+checks:[R(/self\.altura\s*=\s*0/,'Nodo nuevo con self.altura = 0'),R(/def\s+h\s*\(/,'Define h'),R(/def\s+actualizar\s*\(/,'Define actualizar'),R(/def\s+fb\s*\(/,'Define fb'),R(/h\s*\(\s*\w+\.izq\s*\)\s*-\s*h\s*\(\s*\w+\.der\s*\)/,'fb = h(izq) - h(der)'),
+R(/def\s+rotar_derecha\s*\(/,'Define rotar_derecha'),R(/def\s+rotar_izquierda\s*\(/,'Define rotar_izquierda'),R(/def\s+balancear\s*\(/,'Define balancear'),F(c=>/actualizar\s*\(/.test(fnBody(c,'balancear')),'balancear primero actualiza la altura'),
+R(/>\s*1\s*:/,'Detecta FB > 1 (pesa a la izquierda)'),R(/<\s*-\s*1\s*:/,'Detecta FB < -1 (pesa a la derecha)'),
+R(/fb\s*\(\s*\w+\.izq\s*\)\s*<\s*0/,'Caso LR: if fb(nodo.izq) < 0'),R(/\.izq\s*=\s*rotar_izquierda\s*\(\s*\w+\.izq\s*\)/,'LR: nodo.izq = rotar_izquierda(nodo.izq)'),R(/return\s+rotar_derecha\s*\(\s*\w+\s*\)/,'LL/LR: return rotar_derecha(nodo)'),
+R(/fb\s*\(\s*\w+\.der\s*\)\s*>\s*0/,'Caso RL: if fb(nodo.der) > 0'),R(/\.der\s*=\s*rotar_derecha\s*\(\s*\w+\.der\s*\)/,'RL: nodo.der = rotar_derecha(nodo.der)'),R(/return\s+rotar_izquierda\s*\(\s*\w+\s*\)/,'RR/RL: return rotar_izquierda(nodo)'),
+R(/def\s+insertar_avl\s*\(/,'Define insertar_avl'),R(/return\s+balancear\s*\(\s*\w+\s*\)/,'insertar_avl termina con return balancear(nodo)')],
+exp:['Es el BST de siempre, pero la última línea es <code>return balancear(nodo)</code>: así cada nodo del camino se revisa al volver de la recursión.','Zig-zag (LR/RL): primero se endereza el hijo y luego cae al caso simple.']},
+];
+/* punto 2 con enunciado al azar */
+const SCEN=[
+  {cls:'Paciente',pl:'pacientes',ctx:'Una sala de urgencias organiza a sus pacientes en un árbol binario de búsqueda.',other:'gravedad',disp:'gravedad'},
+  {cls:'Evento',pl:'eventos',ctx:'Un sistema sísmico guarda eventos en un árbol binario de búsqueda.',other:'magnitud',disp:'magnitud'},
+  {cls:'Pedido',pl:'pedidos',ctx:'Una tienda guarda sus pedidos en un árbol binario de búsqueda.',other:'monto',disp:'monto'},
+  {cls:'Tarea',pl:'tareas',ctx:'Un planificador guarda tareas en un árbol binario de búsqueda.',other:'duracion',disp:'duración'},
+];
+function genP2(){
+  const sc=pick(SCEN),order=shuffle(['prioridad',sc.other]);
+  const dir={prioridad:pick(['asc','asc','desc']),[sc.other]:pick(['desc','desc','asc'])};
+  const disp=f=>f==='prioridad'?'prioridad':sc.disp;
+  const words=f=>dir[f]==='asc'?`<b>menor ${disp(f)}</b>${f==='prioridad'?' (1 es la más importante)':''}`:`<b>mayor ${disp(f)}</b>`;
+  const keyParts=order.map(f=>(dir[f]==='desc'?'-':'')+'self.'+f).concat(['self.id']);
+  const objs=Array.from({length:3},()=>[rnd(1,3),rnd(1,9),rnd(10,99)]);
+  const cmt=`# 1° ${disp(order[0])} (${dir[order[0]]==='desc'?'mayor':'menor'} primero), 2° ${disp(order[1])} (${dir[order[1]]==='desc'?'mayor':'menor'} primero), 3° id`;
+  const sol=SOL_NODO+`
+
+
+class ${sc.cls}:
+    def __init__(self, prioridad, ${sc.other}, id):
+        self.prioridad = prioridad
+        self.${sc.other} = ${sc.other}
+        self.id = id
+
+    def clave(self):
+        ${cmt}
+        return (${keyParts.join(', ')})
+
+
+def insertar(nodo, x):
+    if nodo is None:
+        return Nodo(x)
+    if x.clave() < nodo.valor.clave():
+        nodo.izq = insertar(nodo.izq, x)
+    else:
+        nodo.der = insertar(nodo.der, x)
+    return nodo
+
+
+raiz = None
+`+objs.map(o=>`raiz = insertar(raiz, ${sc.cls}(${o.join(', ')}))`).join('\n');
+  const st=`${sc.ctx} Cada uno tiene <code>prioridad</code>, <code>${sc.other}</code> e <code>id</code>. Va primero (más a la izquierda en el árbol) el de ${words(order[0])}; si empatan, el de ${words(order[1])}; y si también empatan, el de <b>menor id</b>.<br>Escriba: (a) la clase <code>Nodo</code>; (b) la clase <code>${sc.cls}</code> con un método <code>clave()</code>; (c) <code>insertar(nodo, x)</code> que compare por la clave; (d) cree estos 3 ${sc.pl} e insértelos empezando con <code>raiz = None</code>: ${objs.map(o=>`(prioridad=${o[0]}, ${sc.other}=${o[1]}, id=${o[2]})`).join(', ')}.`;
+  const tupleCheck=c=>{
+    const m=c.match(/def\s+clave\s*\(\s*self\s*\)\s*:[\s\S]*?return\s*\(?([^\n)]*)\)?/);
+    if(!m)return {ok:false,detail:'No encontré "return (...)" dentro de clave(). Si lo resolvió con __lt__ e ifs, compárelo a mano con la solución.'};
+    const items=m[1].split(',').map(s=>s.replace(/\s+/g,''));
+    if(items.length===3&&items.every((x,i)=>x===keyParts[i]))return {ok:true};
+    const names=items.map(x=>x.replace(/^-/,'')),expN=keyParts.map(x=>x.replace(/^-/,''));
+    if(names.join()!==expN.join())return {ok:false,detail:`Orden de los campos: primero ${order[0]}, luego ${order[1]} y al final id → ${keyParts.map(x=>x.replace(/^-/,'')).join(', ')}.`};
+    const errs=order.filter((f,i)=>items[i]!==keyParts[i]).map(f=>dir[f]==='desc'?`${f}: como es "mayor primero", lleva signo menos (-self.${f}).`:`${f}: como es "menor primero", va sin signo menos.`);
+    return {ok:false,detail:errs.join(' ')};
+  };
+  return {id:'f7',t:'7. Punto 2: nodos con prioridad',st,sol,
+    checks:[R(/class\s+Nodo\s*:/,'Define class Nodo:'),R(new RegExp('class\\s+'+sc.cls+'\\s*:'),`Define class ${sc.cls}:`),R(/self\.prioridad\s*=/,'Guarda self.prioridad'),R(new RegExp('self\\.'+sc.other+'\\s*='),`Guarda self.${sc.other}`),R(/self\.id\s*=/,'Guarda self.id'),
+      R(/def\s+(clave|__lt__)\s*\(\s*self/,'Tiene def clave(self) (o __lt__)'),F(tupleCheck,`clave() devuelve (${keyParts.join(', ')})`),
+      R(/def\s+insertar\s*\(/,'Define insertar(nodo, x)'),R(/return\s+Nodo\s*\(\s*\w+\s*\)/,'Caso base: return Nodo(x)'),
+      F(c=>/\.clave\s*\(\s*\)\s*<\s*[\w.]+\.clave\s*\(\s*\)/.test(c)||(/def\s+__lt__/.test(c)&&/\w+\s*<\s*\w+\.valor\b/.test(c)),'Compara las claves: x.clave() < nodo.valor.clave()','El nodo guarda el objeto en nodo.valor: se compara x.clave() con nodo.valor.clave().'),
+      R(/\.izq\s*=\s*insertar\s*\(\s*\w+\.izq/,'Reengancha a la izquierda'),R(/\.der\s*=\s*insertar\s*\(\s*\w+\.der/,'Reengancha a la derecha'),R(/^ {4}return\s+[a-z_]\w*\s*$/m,'Al final: return nodo'),
+      R(new RegExp(sc.cls+'\\s*\\(\\s*-?\\d'),`Crea objetos: ${sc.cls}(${objs[0].join(', ')})`),R(/(\w+)\s*=\s*insertar\s*\(\s*\1\s*,/,'raiz = insertar(raiz, ...)')],
+    exp:['Python compara tuplas campo por campo: por eso basta con armar la tupla en el orden de importancia.',`"Mayor primero" se logra con signo menos: el mayor se vuelve el más negativo, o sea el más pequeño.`,'El id va al final para desempatar; como es único, nunca hay dos claves iguales (por eso el else sin problema).','Alternativa: <code>def __lt__(self, otro): return self.clave() &lt; otro.clave()</code> y comparar <code>x &lt; nodo.valor</code>.']};
+}
+const FS={ex:null};
+function fLoad(){
+  const sel=$('#fSel').value;
+  FS.ex=sel==='f7'?genP2():FREE.find(e=>e.id===sel);
+  $('#fNewVar').hidden=sel!=='f7';
+  $('#fStatement').innerHTML=`<b>${FS.ex.t}</b><br>${FS.ex.st}`;
+  $('#fCode').value=store.get('free_'+sel)||'';
+  $('#fResult').innerHTML='';
+}
+function numbered(code){return code.split('\n').map((l,i)=>`<span class="ln">${i+1}</span>${esc(l)}`).join('\n');}
+ACT.fCheck=()=>{
+  const raw=$('#fCode').value;
+  if(!raw.trim()){$('#fResult').innerHTML='<div class="fb bad">Escriba su código primero (en papel y luego aquí).</div>';return;}
+  const code=stripComments(raw),ex=FS.ex;
+  const syn=pySyntax(raw),synBad=syn.filter(s=>!s.ok);
+  const key=ex.checks.map(ch=>{const r=ch.test(code);return typeof r==='object'?{label:ch.label,ok:r.ok,detail:r.detail}:{label:ch.label,ok:r,detail:r?'':(ch.hint||'')};});
+  const okK=key.filter(k=>k.ok).length;
+  const li=x=>`<li class="${x.ok?'cok':'cbad'}"><span>${x.ok?'✓':'✗'}</span> ${x.label}${!x.ok&&x.detail?`<div class="small muted">${x.detail}</div>`:''}</li>`;
+  const allOk=okK===key.length&&!synBad.length;
+  $('#fResult').innerHTML=`<div class="fb ${allOk?'ok':'bad'}"><div class="verdict">Puntos clave: ${okK}/${key.length} · Sintaxis: ${synBad.length?synBad.length+' problema(s)':'bien'}</div>
+    <div class="cols"><div><h4>Sintaxis de Python</h4><ul class="checks">${(synBad.length?synBad:syn.slice(0,0)).map(li).join('')||'<li class="cok"><span>✓</span> No encontré errores típicos de sintaxis.</li>'}</ul></div>
+    <div><h4>Puntos clave del ejercicio</h4><ul class="checks">${key.map(li).join('')}</ul></div></div>
+    <p class="note">Esto revisa patrones, no ejecuta el código. Compare línea por línea con la solución.</p></div>
+    <div class="cols cmp"><figure><figcaption>Su código</figcaption><pre class="code">${numbered(raw)}</pre></figure><figure><figcaption>Solución</figcaption><pre class="code">${esc(ex.sol)}</pre></figure></div>
+    <details open><summary>Explicación</summary><ul>${ex.exp.map(x=>`<li>${x}</li>`).join('')}</ul></details>`;
+};
+ACT.fClear=()=>{$('#fCode').value='';store.set('free_'+$('#fSel').value,'');$('#fResult').innerHTML='';};
+ACT.fNewVar=()=>{fLoad();};
+(function initFree(){
+  $('#fSel').innerHTML=FREE.map(e=>`<option value="${e.id}">${e.t}</option>`).join('')+'<option value="f7">7. Punto 2: nodos con prioridad (enunciado al azar)</option>';
+  $('#fSel').addEventListener('change',fLoad);
+  const ta=$('#fCode');
+  const put=t=>{ta.setRangeText(t,ta.selectionStart,ta.selectionEnd,'end');store.set('free_'+$('#fSel').value,ta.value);};
+  ta.addEventListener('input',()=>store.set('free_'+$('#fSel').value,ta.value));
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){
+      e.preventDefault();
+      if(e.shiftKey){const s=ta.selectionStart,ls=ta.value.lastIndexOf('\n',s-1)+1,m=ta.value.slice(ls).match(/^ {1,4}/);if(m){ta.setRangeText('',ls,ls+m[0].length,'preserve');ta.selectionStart=ta.selectionEnd=Math.max(ls,s-m[0].length);}}
+      else put('    ');
+    }else if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey){
+      e.preventDefault();
+      const before=ta.value.slice(0,ta.selectionStart),line=before.slice(before.lastIndexOf('\n')+1);
+      let ind=line.match(/^ */)[0];if(/:\s*(#.*)?$/.test(line))ind+='    ';
+      put('\n'+ind);
+    }
+  });
+  fLoad();
+})();
+
+/* ===================== TUPLAS ===================== */
+const tupStr=t=>'('+t.join(', ')+')';
+function tqNew(){
+  const pairs=[];
+  for(let i=0;i<6;i++){
+    const a=[rnd(1,3),rnd(1,4),rnd(10,40)];const b=a.slice();
+    const pos=rnd(0,2);b[pos]=pos===2?rnd(10,40):rnd(1,4);
+    if(Math.random()<0.3){a[0]=-a[0];b[0]=-b[0];}
+    if(tupCmp(a,b)===0)b[2]=a[2]+1;
+    pairs.push([a,b]);
+  }
+  $('#tupQuiz').innerHTML=pairs.map(([a,b],i)=>`<div class="pair"><span class="mono">${tupStr(a)} &lt; ${tupStr(b)}</span><span class="tf"><button class="btn" data-act="tqAns" data-v="1" data-r="${tupCmp(a,b)<0?1:0}" data-i="${i}">True</button><button class="btn" data-act="tqAns" data-v="0" data-r="${tupCmp(a,b)<0?1:0}" data-i="${i}">False</button></span><span id="tq${i}" class="small"></span></div>`).join('');
+}
+ACT.tqNew=tqNew;
+ACT.tqAns=b=>{const ok=b.dataset.v===b.dataset.r;$('#tq'+b.dataset.i).innerHTML=ok?'<span class="mark-ok">✓</span>':`<span class="mark-bad">✗ es ${b.dataset.r==='1'?'True':'False'}</span>`;};
+tqNew();
+
+const T={};
+const FDESC={
+  magnitud:{desc:'mayor magnitud va primero',asc:'menor magnitud va primero'},
+  prioridad:{asc:'prioridad 1 va antes que 2 y 3 (menor número primero)',desc:'prioridad 3 va antes que 2 y 1 (mayor número primero)'},
+};
+function keyExpr(order,dir){return '('+order.map(f=>(dir[f]==='desc'?'-':'')+'self.'+f).concat(['self.id']).join(', ')+')';}
+function tupNew(){
+  const order=shuffle(['magnitud','prioridad']);
+  const dir={magnitud:pick(['desc','desc','asc']),prioridad:pick(['asc','asc','desc'])};
+  const ids=shuffle(Array.from({length:50},(_,i)=>i+10)).slice(0,7);
+  const evs=ids.map(id=>({id,prioridad:rnd(1,3),magnitud:rnd(1,4)}));
+  const key=e=>order.map(f=>dir[f]==='desc'?-e[f]:e[f]).concat([e.id]);
+  const correct=keyExpr(order,dir);
+  const opts=new Set([correct]);
+  const variants=[];
+  for(const o of [order,order.slice().reverse()])for(const d1 of ['asc','desc'])for(const d2 of ['asc','desc'])variants.push(keyExpr(o,{[o[0]]:d1,[o[1]]:d2}));
+  for(const v of shuffle(variants)){if(opts.size>=4)break;opts.add(v);}
+  T.order=order;T.dir=dir;T.evs=evs;T.key=key;T.correct=correct;T.opts=shuffle([...opts]);T.kind=$('#tKind')?.value||'bst';
+  tupRender();
+}
+function tupRender(){
+  const rule=`1° ${T.order[0]}: ${FDESC[T.order[0]][T.dir[T.order[0]]]}. 2° ${T.order[1]}: ${FDESC[T.order[1]][T.dir[T.order[1]]]}. 3° si todo empata: menor id primero.`;
+  $('#tupEx').innerHTML=`<h3>Ejercicio con eventos</h3>
+    <div class="toolbar"><label for="tKind">Árbol<select id="tKind"><option value="bst" ${T.kind==='bst'?'selected':''}>BST (sin balancear)</option><option value="avl" ${T.kind==='avl'?'selected':''}>AVL</option></select></label><button class="btn" data-act="tupNew">Nuevo ejercicio</button></div>
+    <p class="callout blue"><b>Regla de prioridad.</b> ${rule} "Va primero" = queda más a la izquierda.</p>
+    <div class="tscroll"><table class="t" style="max-width:520px"><thead><tr><th>Orden de llegada</th><th>id</th><th>prioridad</th><th>magnitud</th></tr></thead><tbody>${T.evs.map((e,i)=>`<tr><td>${i+1}</td><td class="mono">${e.id}</td><td class="mono">${e.prioridad}</td><td class="mono">${e.magnitud}</td></tr>`).join('')}</tbody></table></div>
+    <h4>a) ¿Qué debe devolver <code>clave(self)</code>?</h4>
+    <div class="choices">${T.opts.map(o=>`<label class="choice"><input type="radio" name="tKey" value="${esc(o)}"><span class="mono">${esc(o)}</span></label>`).join('')}</div>
+    <div class="field"><label for="tIn">b) Ids en inorden (del que va primero al último)</label><input id="tIn" class="mono wide"></div>
+    <div class="field"><label for="tPre">c) Insertando en el orden de llegada en un ${T.kind==='avl'?'AVL':'BST'}: ids en preorden</label><input id="tPre" class="mono wide"></div>
+    <div class="actions"><button class="btn primary" data-act="tupCheck">Revisar</button></div><div id="tFb"></div>`;
+  $('#tKind').addEventListener('change',e=>{T.kind=e.target.value;tupRender();});
+}
+ACT.tupNew=tupNew;
+ACT.tupCheck=()=>{
+  const keys=T.evs.map(T.key);
+  const tree=T.kind==='avl'?buildAVL(keys,tupCmp):buildBST(keys,tupCmp);
+  const idOf=k=>k[k.length-1];
+  const inIds=ino(tree).map(idOf),preIds=pre(tree).map(idOf);
+  const ch=$('input[name="tKey"]:checked')?.value;
+  const okK=ch===T.correct,uIn=parseList($('#tIn').value),uPre=parseList($('#tPre').value);
+  const okI=sameList(uIn,inIds),okP=sameList(uPre,preIds);
+  const fmtK=k=>'('+k.map(x=>String(x).replace('-','−')).join(',')+')';
+  $('#tFb').innerHTML=`<div class="fb ${okK&&okI&&okP?'ok':'bad'}"><div class="verdict">${[okK,okI,okP].filter(Boolean).length}/3 correctas</div>
+    <p>${okK?'<span class="mark-ok">✓</span>':'<span class="mark-bad">✗</span>'} a) <span class="mono">${esc(T.correct)}</span></p>
+    <p>${okI?'<span class="mark-ok">✓</span>':'<span class="mark-bad">✗</span>'} b) <span class="mono">${inIds.join(', ')}</span></p>
+    <p>${okP?'<span class="mark-ok">✓</span>':'<span class="mark-bad">✗</span>'} c) <span class="mono">${preIds.join(', ')}</span></p>
+    <div class="tscroll"><table class="t" style="max-width:520px"><thead><tr><th>id</th><th>clave</th></tr></thead><tbody>${T.evs.map(e=>`<tr><td class="mono">${e.id}</td><td class="mono">${fmtK(T.key(e))}</td></tr>`).join('')}</tbody></table></div>
+    <div class="trees">${fig(`${T.kind==='avl'?'AVL':'BST'} resultante (id arriba, clave abajo)`,drawBin(tree,{label:k=>'#'+idOf(k),sub:n=>fmtK(n.k)}))}</div></div>`;
+};
+tupNew();
+
+/* ===================== VISUALIZADOR 2-3 / RN ===================== */
+const V={snaps:[],i:0,type:'23',shown:false};
+function vLoad(){
+  const seq=parseList($('#vSeq').value);
+  if(!seq||!seq.length){$('#vBody').innerHTML='<div class="fb bad">Escriba números separados por coma.</div>';return;}
+  V.type=$('#vType').value;V.snaps=[];V.i=0;V.shown=false;
+  if(V.type==='23'){let root=null;for(const k of seq){const log=[];root=ins23root(root,k,log);V.snaps.push({k,log,html:draw23(clone23(root))});}}
+  else if(V.type==='rb'){const Tr={root:null};for(const k of seq){const log=[];rbInsert(Tr,k,log);V.snaps.push({k,log,html:drawBin(rbSnap(Tr.root),{cls:n=>n.c})});}}
+  else{let t=null;for(const k of seq){const st=stepInsert(t,k,numCmp);t=st.after;V.snaps.push({k,logHTML:explainLog(st.log),html:drawBin(t,{bf:true,cls:n=>n.k===k?'new':''})});}}
+  vRender();
+}
+function vRender(){
+  const s=V.snaps[V.i],n=V.snaps.length;
+  const hide=$('#vHide').checked&&!V.shown;
+  const prev=V.i>0?V.snaps[V.i-1].html:'<p class="muted small">(vacío)</p>';
+  $('#vBody').innerHTML=`<div class="row" style="justify-content:space-between"><div class="chips">${V.snaps.map((x,j)=>`<span class="chip ${j<V.i?'done':j===V.i?'cur':''}">${x.k}</span>`).join('')}</div>
+    <div class="row"><button class="btn" data-act="vPrev" ${V.i===0?'disabled':''}>← Anterior</button><button class="btn primary" data-act="vNext" ${V.i>=n-1?'disabled':''}>Siguiente →</button></div></div>
+    <p class="statement">Paso ${V.i+1} de ${n}: insertar <b>${s.k}</b></p>
+    <div class="trees">${fig('Antes',prev)}${hide?`<figure><figcaption>Después</figcaption><p class="muted">Hágalo en papel primero.</p><button class="btn primary" data-act="vShow">Mostrar resultado</button></figure>`:fig('Después',s.html)}</div>
+    ${hide?'':(s.logHTML||`<ol class="steps">${s.log.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`)}`;
+}
+ACT.vLoad=vLoad;
+ACT.vNext=()=>{if(V.i<V.snaps.length-1){V.i++;V.shown=false;vRender();}};
+ACT.vPrev=()=>{if(V.i>0){V.i--;V.shown=true;vRender();}};
+ACT.vShow=()=>{V.shown=true;vRender();};
+ACT.vRand=()=>{const s=new Set();const n=rnd(7,11);while(s.size<n)s.add(rnd(1,60));$('#vSeq').value=[...s].join(', ');vLoad();};
+$('#vType').addEventListener('change',vLoad);
+$('#vHide').addEventListener('change',()=>{if(V.snaps.length)vRender();});
+vLoad();
+
+/* ===================== arranque ===================== */
+const hash=(location.hash||'').slice(1);
+const startTab=['guia','drill','taller','series','parcial','python','tuplas','otros'].includes(hash)?hash:(store.get('tab')||'guia');
+showTab(['guia','drill','taller','series','parcial','python','tuplas','otros'].includes(startTab)?startTab:'guia');
+dNew();
+pNew();
+</script>
+
+</html>
