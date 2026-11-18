@@ -265,6 +265,21 @@ table.cxt tbody tr:hover td,table.cxt tbody tr.on td{background:var(--warn-soft)
 table.cxt tbody tr:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 table.cxt td:first-child{white-space:nowrap;color:var(--accent);font-weight:600}
 .cxg{max-width:520px;margin:8px 0}
+.qsteps{display:flex;flex-direction:column;gap:12px}
+.qstep{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
+.qstep h4{margin:2px 0 4px}
+.qstep ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:3px}
+.qn{width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--panel);font:800 15px var(--f-display);display:grid;place-items:center}
+h3.dh{margin-top:18px}
+.deep{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;margin:12px 0}
+.dp{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px;min-width:0;background:var(--panel)}
+.dp h5{font-family:var(--f-display);font-weight:800;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px;color:var(--muted)}
+.dp p{margin:0 0 6px}.dp p:last-child{margin-bottom:0}
+.dp ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+.dp.idea{border-left-color:var(--accent)}.dp.idea h5{color:var(--accent)}
+.dp.why{border-left-color:var(--warn)}.dp.why h5{color:var(--warn)}
+.dp.use{border-left-color:var(--ok);background:var(--ok-soft)}.dp.use h5{color:var(--ok)}
+.dp.no{border-left-color:var(--bad);background:var(--bad-soft)}.dp.no h5{color:var(--bad)}
 </style>
 <div class="wrap">
   <header class="top">
@@ -295,6 +310,32 @@ table.cxt td:first-child{white-space:nowrap;color:var(--accent);font-weight:600}
     </div>
 
     <div class="card">
+      <h2>Cómo escoger: tres preguntas</h2>
+      <p class="muted">Lea el enunciado y hágase estas preguntas en orden.</p>
+      <div class="qsteps">
+        <div class="qstep"><div class="qn">1</div><div><h4>¿Qué me piden?</h4>
+          <ul>
+            <li><b>Visitar, encontrar, contar o separar en grupos</b> (quién está conectado, a quién llego, por niveles) → <b>recorrido</b>: BFS o DFS.</li>
+            <li><b>El camino más corto o más barato</b> → BFS, Dijkstra, Bellman-Ford o Floyd-Warshall.</li>
+            <li><b>Conectar todo gastando lo mínimo</b>, sin importar el camino entre dos puntos → <b>árbol de expansión mínima</b>: Prim, Kruskal o Borůvka.</li>
+            <li><b>Cuánto cabe o pasa como máximo</b> de un punto a otro, con capacidades → <b>flujo máximo</b>: Ford-Fulkerson.</li>
+            <li><b>En qué orden hacer las cosas</b>, con dependencias → <b>orden topológico</b>.</li>
+          </ul></div></div>
+        <div class="qstep"><div class="qn">2</div><div><h4>¿Las aristas tienen peso?</h4>
+          <ul>
+            <li>Sin peso, o todas valen lo mismo ("un minuto", "una calle", "un salto") → <b>BFS</b> ya da lo más corto.</li>
+            <li>Pesos <b>positivos</b> y distintos → <b>Dijkstra</b>.</li>
+            <li>Algún peso <b>negativo</b> → <b>Bellman-Ford</b>.</li>
+          </ul></div></div>
+        <div class="qstep"><div class="qn">3</div><div><h4>¿Desde dónde?</h4>
+          <ul>
+            <li><b>Desde un solo origen</b> → BFS, Dijkstra o Bellman-Ford.</li>
+            <li><b>Entre todas las parejas</b> → <b>Floyd-Warshall</b>.</li>
+          </ul></div></div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>¿Cuál uso? (lo que más se pregunta)</h2>
       <div class="tscroll"><table class="t">
         <thead><tr><th>Si el problema dice…</th><th>Algoritmo</th><th>Parámetros</th><th>Devuelve</th></tr></thead>
@@ -311,6 +352,25 @@ table.cxt td:first-child{white-space:nowrap;color:var(--accent);font-weight:600}
         </tbody>
       </table></div>
       <div class="callout blue"><b>El parcial del otro grupo:</b> el robot que recoge flores <b>recorre todo el grafo</b> → DFS(grafo, vértice actual). Y para <b>devolverlo por el camino más corto</b> al inicio → Dijkstra(grafo, origen = vértice final) y luego reconstruir el camino hasta el destino = vértice inicial.</div>
+    </div>
+
+    <div class="card">
+      <h2>El taller con este mapa</h2>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th>Punto</th><th>Qué pide</th><th>Algoritmo</th><th>Por qué</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Vecinos todos primos</td><td>Ninguno: mirar los vecinos</td><td>No hay que ir más allá de un salto.</td></tr>
+          <tr><td>2</td><td>Minuto en que se entera cada uno</td><td><b>BFS</b></td><td>"Cada minuto pasa a los vecinos" = niveles.</td></tr>
+          <tr><td>3</td><td>Amigos en común</td><td>Ninguno: comparar vecinos</td><td>Es contar vecinos compartidos.</td></tr>
+          <tr><td>4</td><td>Dos turnos</td><td><b>BFS</b> (o DFS) coloreando</td><td>Vecinos con colores alternos = bipartito.</td></tr>
+          <tr><td>5</td><td>Grupo que más dona</td><td><b>DFS</b> (o BFS) por componentes</td><td>"Cadena de contactos" = componente conexa.</td></tr>
+          <tr><td>6</td><td>Ruta accesible más rápida</td><td><b>Dijkstra</b></td><td>Pesos positivos distintos, un origen.</td></tr>
+          <tr><td>7</td><td>Semestres</td><td><b>Orden topológico</b></td><td>Dependencias y detectar ciclo.</td></tr>
+          <tr><td>8</td><td>Puesto más cercano</td><td><b>BFS</b></td><td>Todos los senderos valen 1 minuto.</td></tr>
+          <tr><td>9</td><td>Ida y vuelta</td><td><b>DFS</b> dos veces (normal y con flechas volteadas)</td><td>Solo importa a qué se llega.</td></tr>
+          <tr><td>10</td><td>Carreteras críticas</td><td><b>BFS</b> después de quitar cada arista</td><td>Ver quién queda conectado a la capital.</td></tr>
+        </tbody>
+      </table></div>
     </div>
 
     <div class="card">
@@ -341,6 +401,16 @@ C  [ 2, 1, 0 ]</pre>
           </ul>
         </div>
       </div>
+      <div class="tscroll"><table class="t">
+        <thead><tr><th></th><th>Lista / diccionario (<code>self.ady</code>)</th><th>Matriz</th></tr></thead>
+        <tbody>
+          <tr><td>Espacio</td><td class="mono">O(V + E)</td><td class="mono">O(V²)</td></tr>
+          <tr><td>¿Hay arista u → v?</td><td>busca en los vecinos de u (rápido en un diccionario)</td><td>O(1): mira una casilla</td></tr>
+          <tr><td>Recorrer los vecinos de u</td><td>solo los que hay</td><td>revisa toda la fila: O(V)</td></tr>
+          <tr><td>Conviene en</td><td>grafos con pocas aristas (lo normal)</td><td>grafos densos, o Floyd-Warshall</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small">La matriz no es un algoritmo: es <b>otra forma de guardar el grafo</b>. Para leerla: no dirigido → simétrica; <b>grado de salida</b> de u = no-ceros en su <b>fila</b>; <b>grado de entrada</b> = no-ceros en su <b>columna</b>.</p>
       <pre class="code"><span class="kw">class</span> Grafo:
     <span class="kw">def</span> __init__(self, dirigido=False):
         self.ady = {}
@@ -381,6 +451,20 @@ C  [ 2, 1, 0 ]</pre>
         </div>
       </div>
       <p class="small">Los dos: <b>O(V + E)</b>. Si no todos los vértices son alcanzables, los que faltan no salen en el recorrido.</p>
+      <h3 class="dh">BFS a fondo</h3>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Una piedra en el agua: las ondas salen en anillos, primero el más cercano y luego el siguiente. O un chisme: en el minuto 1 se enteran mis amigos, en el minuto 2 los amigos de ellos.</p></div>
+        <div class="dp why"><h5>Por qué funciona</h5><p>La cola obliga a terminar <b>todo</b> el nivel 1 antes de tocar el nivel 2. Por eso, la primera vez que aparece un vértice es por el camino con <b>menos aristas</b> posible.</p></div>
+        <div class="dp use"><h5>Úselo cuando diga</h5><ul><li>"mínimo número de pasos / saltos / calles"</li><li>"cada minuto se enteran los vecinos" (taller 2)</li><li>"todos los senderos tardan 1 minuto" (taller 8)</li><li>"por niveles", "amigos de amigos"</li><li>dividir en dos grupos, bipartito (taller 4)</li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Las aristas tienen <b>pesos distintos</b>. BFS cuenta aristas, no suma pesos: tomaría un camino de 2 aristas que cuesta 100 por mejor que uno de 3 aristas que cuesta 3.</p></div>
+      </div>
+      <h3 class="dh">DFS a fondo</h3>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Salir de un laberinto con la mano en la pared: avanza por un pasillo hasta que no puede más y entonces <b>se devuelve</b> al último cruce donde quedó algo sin explorar.</p></div>
+        <div class="dp why"><h5>Por qué funciona</h5><p>La recursión (o la pila) recuerda el camino por donde vino, así que siempre sabe a dónde devolverse. Es la forma más natural de <b>explorar todo</b>, y el camino que va armando sirve para detectar ciclos.</p></div>
+        <div class="dp use"><h5>Úselo cuando</h5><ul><li>hay que <b>recorrer todo</b> y no importan el orden ni la distancia (las flores del parcial)</li><li>hay que encontrar <b>grupos / componentes</b> (taller 5): un DFS desde cada no visitado da un grupo</li><li>"¿se puede llegar de A a B?"</li><li>a qué llego y desde dónde regreso (taller 9)</li><li>detectar <b>ciclos</b></li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Piden la <b>distancia más corta</b>: DFS puede llegar a un vértice por un camino larguísimo. Para "recorrer todo" sirven los dos; si piden <b>distancia o niveles</b>, BFS.</p></div>
+      </div>
       <div class="codex" data-g="rec"></div>
     </div>
 
@@ -395,6 +479,13 @@ C  [ 2, 1, 0 ]</pre>
       </ol>
       <p>El camino se arma <b>al revés</b> con los "viene de": destino → su previo → … → origen, y luego se voltea.</p>
       <p class="small">O(V²) con la búsqueda simple del mínimo; O((V + E) log V) con heap. <b>Con pesos negativos falla</b>: use Bellman-Ford.</p>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Fuego que se riega por el pasto, más lento donde el camino es largo. Siempre se quema primero el punto más cercano que falta. Una vez quemado, nadie llega antes: su distancia queda <b>fija</b>.</p></div>
+        <div class="dp why"><h5>Por qué funciona</h5><p>Si u es el pendiente más barato, cualquier otro camino hacia u pasaría por otro pendiente, que ya cuesta igual o más. Como <b>no hay negativos</b>, seguir sumando nunca abarata, así que u se puede fijar sin miedo.</p></div>
+        <div class="dp use"><h5>Úselo cuando</h5><ul><li>"ruta de menor tiempo / costo / distancia" con pesos <b>positivos y distintos</b></li><li>taller 6: Dijkstra solo por las conexiones accesibles</li><li>las flores: devolver el robot al inicio</li><li>GPS, repartidor (un Dijkstra por tramo)</li><li>sirve igual en <b>dirigidos</b>: solo sigue las flechas</li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Hay <b>pesos negativos</b>: puede fijar B en 4 y después aparecer C → B con −3 que lo deja en 2, pero B ya estaba fijo (vea el ejemplo de Bellman-Ford). Tampoco hace falta si todas las aristas valen lo mismo: BFS basta.</p></div>
+      </div>
+      <p class="small"><b>Parámetro:</b> el origen. <b>Devuelve:</b> <code>dist</code> (a todos) y <code>prev</code> (de dónde se llegó); el camino a un destino se arma con <code>prev</code>, al revés.</p>
       <div class="codex" data-g="dij"></div>
     </div>
 
@@ -407,6 +498,12 @@ C  [ 2, 1, 0 ]</pre>
         <li>Haga <b>una ronda más</b>: si algo todavía mejora, hay un <b>ciclo negativo</b> (no existe camino más corto).</li>
       </ol>
       <p class="small">O(V · E). Más lento que Dijkstra, pero acepta pesos negativos.</p>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>En vez de fijar vértices como Dijkstra, es <b>paciente</b>: revisa todas las aristas una y otra vez, mejorando lo que se pueda, hasta que nada cambie.</p></div>
+        <div class="dp why"><h5>Por qué funciona</h5><p>Un camino más corto sin ciclos tiene a lo sumo <b>V − 1 aristas</b>. La ronda 1 deja bien los caminos de 1 arista, la 2 los de 2… la V − 1 los cubre todos. Si en la ronda V <b>todavía</b> algo baja, hay una vuelta que cada vez sale más barata: un <b>ciclo negativo</b>, y no existe camino más corto.</p></div>
+        <div class="dp use"><h5>Úselo cuando</h5><ul><li>hay <b>pesos negativos</b>: reembolsos, descuentos, ganancias</li><li>cambio de divisas</li><li>piden <b>detectar</b> un ciclo que da ganancia infinita (arbitraje)</li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Todos los pesos son positivos: funciona, pero es más lento que Dijkstra (O(V · E) contra O(V²)).</p></div>
+      </div>
       <div class="codex" data-g="bf"></div>
     </div>
 
@@ -418,6 +515,12 @@ C  [ 2, 1, 0 ]</pre>
         <li>Truco a mano: la <b>fila k y la columna k no cambian</b>, y la diagonal sigue en 0. Solo revise las demás celdas.</li>
       </ol>
       <p class="small">O(V³). Da las distancias entre todas las parejas. Acepta pesos negativos (sin ciclos negativos): si al final algún D[i][i] &lt; 0, hay ciclo negativo.</p>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Pregunta vértice por vértice: "¿y si dejo pasar por <b>k</b>?". Para cada pareja i, j: si ir de i a k y de k a j es más corto que lo que tenía, lo reemplaza. Al final queda la tabla de distancias de un mapa.</p></div>
+        <div class="dp why"><h5>Por qué funciona</h5><p>Después de procesar k, la matriz tiene los caminos más cortos que solo usan como intermedios los vértices ya procesados. Al terminar con todos, puede usar cualquiera. Por eso <b>k va afuera</b> de los tres ciclos.</p></div>
+        <div class="dp use"><h5>Úselo cuando</h5><ul><li>piden <b>todas</b> las distancias (una tabla completa)</li><li>hay que escoger un "centro": el vértice con la menor distancia máxima a los demás</li><li>el grafo es <b>pequeño</b></li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Solo piden desde <b>un origen</b> (es exagerado: use Dijkstra o Bellman-Ford) o el grafo es grande, porque O(V³) crece muy rápido.</p></div>
+      </div>
       <div class="codex" data-g="fw"></div>
     </div>
 
@@ -433,6 +536,12 @@ C  [ 2, 1, 0 ]</pre>
         </tbody>
       </table></div>
       <p class="small">Prim O(E log V) · Kruskal O(E log E) · Borůvka O(E log V). Solo para grafos <b>no dirigidos y conexos</b>.</p>
+      <div class="callout"><b>MST no es Dijkstra.</b> Dijkstra minimiza el camino <b>desde un origen</b>. El MST minimiza el <b>costo total de la red</b>: en el árbol, el camino entre dos puntos puede salir largo, y no importa, porque lo que se paga es el cable, no el viaje. Úselo cuando diga "conectar <b>todos</b> los edificios / pueblos / computadores con el menor costo total".</div>
+      <div class="deep">
+        <div class="dp idea"><h5>Prim: crecer un solo árbol</h5><p>Una mancha que crece: empieza en un vértice y siempre agrega <b>la arista más barata que sale de la mancha</b> (un extremo adentro, otro afuera).</p><p><b>Por qué funciona:</b> la arista más barata entre "lo que tengo" y "lo que falta" siempre puede estar en un MST; cualquier otra forma de unir esos dos lados costaría igual o más.</p><p><b>Cuándo:</b> le dan un vértice de inicio, o el grafo tiene muchas aristas.</p></div>
+        <div class="dp idea"><h5>Kruskal: ordenar y pegar</h5><p>Ordena <b>todas</b> las aristas de la más barata a la más cara y las va tomando, <b>saltando las que forman ciclo</b>.</p><p><b>Cómo sabe si forma ciclo:</b> con union-find, que dice el grupo de cada vértice. Si los dos extremos ya están en el mismo grupo, la arista cerraría un ciclo.</p><p><b>Cuándo:</b> no hay vértice de inicio, el grafo tiene pocas aristas, o hay una condición de parada (cablear con presupuesto: si una no alcanza, ninguna de las siguientes alcanza).</p></div>
+        <div class="dp idea"><h5>Borůvka: todos a la vez por rondas</h5><p>En cada ronda, <b>cada grupo</b> escoge su arista más barata hacia afuera, y se agregan todas juntas. Los grupos se van fusionando.</p><p><b>Por qué es rápido:</b> en cada ronda el número de grupos al menos se divide entre 2, así que son log V rondas.</p><p><b>Cuándo:</b> el enunciado describe "cada grupo escoge su conexión más barata al mismo tiempo", o se lo piden por nombre.</p></div>
+      </div>
       <div class="codex" data-g="mst"></div>
     </div>
 
@@ -446,7 +555,31 @@ C  [ 2, 1, 0 ]</pre>
         <li>Repita hasta que no haya camino. El <b>flujo máximo</b> es lo que sale de la fuente.</li>
       </ol>
       <p class="small"><b>Flujo máximo = corte mínimo</b>: al final, los vértices alcanzables desde la fuente forman un lado del corte, y las aristas que cruzan suman exactamente el flujo máximo. Con BFS se llama Edmonds-Karp: O(V · E²).</p>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Tubos de agua de distinto grosor, de la planta a la ciudad. Mientras encuentre un camino donde todavía cabe agua, manda por ahí lo máximo que deja pasar el tubo más delgado (el <b>cuello de botella</b>).</p></div>
+        <div class="dp why"><h5>Por qué las aristas de regreso</h5><p>Permiten <b>deshacer</b> una mala decisión: si antes mandó flujo por un tubo que convenía dejar libre, un camino nuevo puede "devolverlo" y reacomodarlo. Sin ellas, el resultado podría quedarse corto.</p></div>
+        <div class="dp use"><h5>Úselo cuando</h5><ul><li>hay <b>capacidades</b>, una <b>fuente</b> y un <b>sumidero</b></li><li>agua, tráfico, datos</li><li>asignaciones con cupo (estudiantes a proyectos)</li><li>"lo mínimo que hay que cortar para separar s de t" (corte mínimo)</li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>Piden un <b>camino</b> (el más corto o barato) y no una <b>cantidad</b> que pasa: eso es BFS o Dijkstra. Necesita grafo <b>dirigido</b> con capacidades.</p></div>
+      </div>
       <div class="codex" data-g="ff"></div>
+    </div>
+
+    <div class="card">
+      <h2>Orden topológico (Kahn)</h2>
+      <p>Para el <b>taller 7</b>. Dice <b>en qué orden hacer las cosas</b> cuando unas dependen de otras. Solo existe en grafos <b>dirigidos sin ciclos</b>.</p>
+      <ol class="recipe">
+        <li>Cuente cuántas flechas le llegan a cada vértice (<b>grado de entrada</b>).</li>
+        <li>Meta a una cola los que tienen <b>0</b>: no dependen de nada.</li>
+        <li>Saque uno y bájele 1 al grado de entrada de cada vértice al que apunta. Los que queden en 0 entran a la cola.</li>
+        <li>Si al final no salieron todos, hay un <b>ciclo</b>: el plan es imposible.</li>
+      </ol>
+      <div class="deep">
+        <div class="dp idea"><h5>La idea</h5><p>Ver primero las materias que <b>no tienen prerrequisitos</b>. Al aprobarlas, otras quedan libres, y así sucesivamente.</p></div>
+        <div class="dp why"><h5>Por qué detecta ciclos</h5><p>En un ciclo, cada vértice depende de otro del mismo ciclo, así que ninguno llega nunca a grado de entrada 0 y no salen de la cola.</p></div>
+        <div class="dp use"><h5>Úselo cuando diga</h5><ul><li>"prerrequisitos", "dependencias"</li><li>"A antes que B", "qué va primero"</li><li>"¿hay un ciclo de dependencias?"</li></ul></div>
+        <div class="dp no"><h5>No lo use cuando</h5><p>El grafo es no dirigido, o piden distancias o caminos.</p></div>
+      </div>
+      <p class="small">O(V + E). En el taller 7, el semestre de cada materia es <code>max(lo que tenía, semestre del prerrequisito + 1)</code>.</p>
     </div>
 
     <div class="card">
