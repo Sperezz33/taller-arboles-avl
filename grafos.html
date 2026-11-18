@@ -1329,14 +1329,16 @@ const MARK={m:'--muted',a:'--accent',w:'--warn',f:'--fg'};
 const markerFor=c=>/path|pick|cand/.test(c)?'w':/mst|tree/.test(c)?'a':/full/.test(c)?'f':'m';
 function arcsOf(G){const out=[];for(const u of G.vs)for(const v of nb(G,u)){if(!G.dir&&cmpV(u,v)>0)continue;out.push({u,v,w:G.adj[u][v],key:G.dir?`${u}>${v}`:`${u}|${v}`});}return out;}
 const ekey=(G,u,v)=>G.dir?`${u}>${v}`:(cmpV(u,v)<0?`${u}|${v}`:`${v}|${u}`);
+let SVGN=0;
 function drawGraph(G,pos,o={}){
+  const sid="g"+(++SVGN);
   const R=19,vcls=o.vcls||(()=>''),ecls=o.ecls||(()=>''),elabel=o.elabel||(e=>fmt(e.w));
   let E='',L='',V='';
   for(const a of arcsOf(G)){
     const p=pos[a.u],q=pos[a.v],dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;
     const anti=G.dir&&(a.u in G.adj[a.v]),off=anti?13:0,nx=-uy*off,ny=ux*off,tip=G.dir?4:0;
     const x1=p.x+ux*R+nx,y1=p.y+uy*R+ny,x2=q.x-ux*(R+tip)+nx,y2=q.y-uy*(R+tip)+ny;
-    const c=ecls(a)||'',mk=G.dir?` marker-end="url(#ar-${markerFor(c)})"`:'';
+    const c=ecls(a)||'',mk=G.dir?` marker-end="url(#${sid}-${markerFor(c)})"`:'';
     E+=`<g class="e ${c}" data-e="${a.key}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${mk}/><line class="ehit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/></g>`;
     const lab=elabel(a);
     if(lab!==null&&lab!==''){const mx=(x1+x2)/2,my=(y1+y2)/2,tw=String(lab).length*7.6+8;L+=`<g class="wl ${c}" data-e="${a.key}"><rect x="${mx-tw/2}" y="${my-9}" width="${tw}" height="18" rx="4"/><text x="${mx}" y="${my+4}">${esc(lab)}</text></g>`;}
@@ -1347,7 +1349,7 @@ function drawGraph(G,pos,o={}){
       (sub!==null&&sub!==undefined?`<text class="sub" y="${R+15}">${esc(sub)}</text>`:'')+
       (bd!==null&&bd!==undefined?`<g class="badge" transform="translate(${R-1},${-R+1})"><circle r="9"/><text y="4">${bd}</text></g>`:'')+`</g>`;
   }
-  const defs=`<defs>${Object.entries(MARK).map(([k,c])=>`<marker id="ar-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(${c})"/></marker>`).join('')}</defs>`;
+  const defs=`<defs>${Object.entries(MARK).map(([k,c])=>`<marker id="${sid}-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(${c})"/></marker>`).join('')}</defs>`;
   return `<svg class="gsvg" viewBox="0 0 560 330" role="img" aria-label="Grafo">${defs}<g>${E}</g><g>${L}</g><g>${V}</g></svg>`;
 }
 
@@ -1358,6 +1360,7 @@ const H={};
 $('#algBar').innerHTML=ALGS.map(([k,l])=>`<button type="button" data-act="simAlg" data-a="${k}" aria-pressed="${k===SIM.alg}">${l}</button>`).join('');
 ACT.simAlg=b=>{SIM.alg=b.dataset.a;store.set('galg',SIM.alg);$$('#algBar button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.a===SIM.alg)));simNew();};
 ACT.simNew=()=>simNew();
+$("#simDir").addEventListener("change",()=>simNew());
 function simNew(){
   $('#simDirWrap').hidden=!['bfs','dfs','dij'].includes(SIM.alg);
   SIM.st={err:0,done:false,msg:'',mcls:''};H[SIM.alg].init();simRender();
