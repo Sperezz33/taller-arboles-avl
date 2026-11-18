@@ -251,6 +251,20 @@ pre.code.inline{margin:0;padding:6px 9px;font-size:12.5px;border-radius:6px}
 #simPanel details{margin-top:6px}
 .toolbar label{min-width:0;max-width:100%}
 #fSel{width:100%;max-width:100%}
+.codex{margin-top:14px}
+.codex>details>summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--accent);padding:9px 12px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);list-style-position:inside}
+.codex>details[open]>summary{margin-bottom:10px}
+.cxm{margin:10px 0 18px}
+.cxgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:860px){.cxgrid{grid-template-columns:1fr}}
+pre.cxcode{white-space:normal;margin:0}
+pre.cxcode .cl{display:block;white-space:pre;border-radius:4px;padding-right:6px}
+pre.cxcode .cl.hl{background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--warn)}
+table.cxt tbody tr{cursor:pointer}
+table.cxt tbody tr:hover td,table.cxt tbody tr.on td{background:var(--warn-soft)}
+table.cxt tbody tr:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+table.cxt td:first-child{white-space:nowrap;color:var(--accent);font-weight:600}
+.cxg{max-width:520px;margin:8px 0}
 </style>
 <div class="wrap">
   <header class="top">
@@ -340,6 +354,7 @@ C  [ 2, 1, 0 ]</pre>
         self.ady[u][v] = peso
         <span class="kw">if not</span> self.dirigido:
             self.ady[v][u] = peso</pre>
+      <div class="codex" data-g="clase"></div>
     </div>
 
     <div class="card">
@@ -366,6 +381,7 @@ C  [ 2, 1, 0 ]</pre>
         </div>
       </div>
       <p class="small">Los dos: <b>O(V + E)</b>. Si no todos los vértices son alcanzables, los que faltan no salen en el recorrido.</p>
+      <div class="codex" data-g="rec"></div>
     </div>
 
     <div class="card">
@@ -379,6 +395,7 @@ C  [ 2, 1, 0 ]</pre>
       </ol>
       <p>El camino se arma <b>al revés</b> con los "viene de": destino → su previo → … → origen, y luego se voltea.</p>
       <p class="small">O(V²) con la búsqueda simple del mínimo; O((V + E) log V) con heap. <b>Con pesos negativos falla</b>: use Bellman-Ford.</p>
+      <div class="codex" data-g="dij"></div>
     </div>
 
     <div class="card">
@@ -390,6 +407,7 @@ C  [ 2, 1, 0 ]</pre>
         <li>Haga <b>una ronda más</b>: si algo todavía mejora, hay un <b>ciclo negativo</b> (no existe camino más corto).</li>
       </ol>
       <p class="small">O(V · E). Más lento que Dijkstra, pero acepta pesos negativos.</p>
+      <div class="codex" data-g="bf"></div>
     </div>
 
     <div class="card">
@@ -400,6 +418,7 @@ C  [ 2, 1, 0 ]</pre>
         <li>Truco a mano: la <b>fila k y la columna k no cambian</b>, y la diagonal sigue en 0. Solo revise las demás celdas.</li>
       </ol>
       <p class="small">O(V³). Da las distancias entre todas las parejas. Acepta pesos negativos (sin ciclos negativos): si al final algún D[i][i] &lt; 0, hay ciclo negativo.</p>
+      <div class="codex" data-g="fw"></div>
     </div>
 
     <div class="card">
@@ -414,6 +433,7 @@ C  [ 2, 1, 0 ]</pre>
         </tbody>
       </table></div>
       <p class="small">Prim O(E log V) · Kruskal O(E log E) · Borůvka O(E log V). Solo para grafos <b>no dirigidos y conexos</b>.</p>
+      <div class="codex" data-g="mst"></div>
     </div>
 
     <div class="card">
@@ -426,6 +446,7 @@ C  [ 2, 1, 0 ]</pre>
         <li>Repita hasta que no haya camino. El <b>flujo máximo</b> es lo que sale de la fuente.</li>
       </ol>
       <p class="small"><b>Flujo máximo = corte mínimo</b>: al final, los vértices alcanzables desde la fuente forman un lado del corte, y las aristas que cruzan suman exactamente el flujo máximo. Con BFS se llama Edmonds-Karp: O(V · E²).</p>
+      <div class="codex" data-g="ff"></div>
     </div>
 
     <div class="card">
@@ -1654,6 +1675,202 @@ ACT.matQs=()=>{const st=SIM.st;let okc=0;st.qs.forEach((q,i)=>{const raw=$('#mqi
   finish(`${okc}/${st.qs.length} preguntas bien.`);$('#simPanel .hmsg')?.remove();$('#simPanel').insertAdjacentHTML('afterbegin',msgBox());$('#simStats').innerHTML=`Grafos resueltos sin errores: <b>${SIM.ok}</b> de <b>${SIM.tot}</b>`;};
 
 simNew();
+
+/* ===================== CÓDIGO EXPLICADO (guía) ===================== */
+// Cada entrada: [texto que identifica la primera línea, cuántas líneas abarca, explicación]
+const EXPL={
+__init__:[
+ ['def __init__',1,'El constructor. Se ejecuta solo cuando se escribe <code>Grafo()</code> o <code>Grafo(True)</code>. <code>dirigido=False</code>: si no se dice nada, es no dirigido.'],
+ ['self.ady = {}',1,'Diccionario vacío guardado <b>en el objeto</b> (por eso <code>self.</code>). Ahí vive todo el grafo: clave = vértice, valor = diccionario de vecinos con su peso.'],
+ ['self.dirigido = dirigido',1,'Guarda si es dirigido para que los otros métodos lo puedan consultar.']],
+agregar_vertice:[
+ ['def agregar_vertice',1,'Agrega un vértice sin aristas (útil para vértices aislados).'],
+ ['if v not in self.ady',2,'Solo si no existe. Si ya existía y se le hiciera <code>= {}</code>, se borrarían sus vecinos.']],
+agregar_arista:[
+ ['def agregar_arista',1,'<code>u</code> = de dónde sale, <code>v</code> = a dónde llega. <code>peso=1</code> por defecto (grafos sin pesos: cada arista cuenta 1 paso).'],
+ ['self.agregar_vertice(u)',2,'Se asegura de que los dos vértices existan; si no, la línea siguiente daría <code>KeyError</code>.'],
+ ['self.ady[u][v] = peso',1,'<b>Crea la arista</b>: entre los vecinos de u, anota a v con su peso.'],
+ ['if not self.dirigido',2,'Si NO es dirigido, la arista sirve en los dos sentidos: también se anota v → u.']],
+bfs:[
+ ['def bfs',1,'Método de la clase: recibe <code>self</code> y el vértice donde empieza.'],
+ ['visitados = [inicio]',1,'Los que ya se vieron. El inicio entra de una vez.'],
+ ['cola = [inicio]',1,'La cola arranca con el inicio.'],
+ ['orden = []',1,'Aquí se anota el orden de visita: es lo que se devuelve.'],
+ ['while len(cola) > 0',1,'Mientras quede alguien en la cola.'],
+ ['u = cola.pop(0)',1,'Saca el <b>primero</b> (<code>pop(0)</code>). Eso la hace una cola. Con <code>pop()</code> sería una pila.'],
+ ['orden.append(u)',1,'Lo anota en el orden.'],
+ ['for v in sorted(self.ady[u])',1,'Recorre los vecinos de u. <code>sorted</code> solo para que los empates salgan en orden alfabético, como a mano.'],
+ ['if v not in visitados',3,'Si el vecino no se ha visto: se marca y se mete al <b>final</b> de la cola. Se marca al <b>meterlo</b> para que no entre dos veces.'],
+ ['return orden',1,'Devuelve el orden de visita.']],
+dfs:[
+ ['def dfs',1,'<code>visitados=None</code>: la primera llamada no lo pasa; las llamadas recursivas pasan la misma lista.'],
+ ['if visitados is None',2,'Solo en la primera llamada se crea la lista vacía. (No se escribe <code>visitados=[]</code> en la firma porque Python reutiliza esa lista entre llamadas distintas.)'],
+ ['visitados.append(inicio)',1,'Marca el vértice actual como visitado.'],
+ ['for v in sorted(self.ady[inicio])',1,'Para cada vecino, en orden alfabético…'],
+ ['if v not in visitados',2,'…si no se ha visitado, <b>baja hasta el fondo</b> por ahí: llamada recursiva con <code>self.</code> y la MISMA lista. Cuando esa llamada termina, el <code>for</code> sigue con el siguiente vecino: eso es "devolverse".'],
+ ['return visitados',1,'Devuelve la lista en el orden en que se visitaron.']],
+dfs_pila:[
+ ['def dfs_pila',1,'La misma idea de DFS pero sin recursión: con una pila explícita.'],
+ ['visitados = []',2,'Lista de visitados vacía y la pila con el inicio.'],
+ ['while len(pila) > 0',1,'Mientras la pila tenga algo.'],
+ ['u = pila.pop()',1,'Saca el <b>último</b> (<code>pop()</code> sin el 0): pila.'],
+ ['if u not in visitados',2,'Un vértice puede estar repetido en la pila; si ya se visitó, se ignora.'],
+ ['for v in sorted(self.ady[u], reverse=True)',3,'Mete los vecinos <b>al revés</b> para que el menor quede encima y salga primero. Así da el mismo orden que el recursivo.'],
+ ['return visitados',1,'']],
+dijkstra:[
+ ['def dijkstra',1,'Solo pesos <b>no negativos</b>. Parámetro: el origen.'],
+ ['dist = {}',2,'<code>dist[v]</code> = la mejor distancia conocida desde el inicio. <code>prev[v]</code> = de dónde se llegó a v (para armar el camino).'],
+ ['for v in self.ady',3,'Al principio todos en infinito y sin <code>prev</code>.'],
+ ['dist[inicio] = 0',1,'El origen está a 0 de sí mismo.'],
+ ['pendientes = list(self.ady)',1,'Todos empiezan pendientes (sin fijar).'],
+ ['while len(pendientes) > 0',1,'Una vuelta por cada vértice que se fija.'],
+ ['u = pendientes[0]',4,'Busca el pendiente con <b>menor distancia</b> (empate: el menor alfabéticamente). Es el paso "escoger el mínimo" de la tabla a mano.'],
+ ['if dist[u] == INF',2,'Si el menor es infinito, los que quedan no se pueden alcanzar: termina.'],
+ ['pendientes.remove(u)',1,'<b>Fija</b> u: su distancia ya es definitiva.'],
+ ['for v in self.ady[u]',4,'<b>Relajar</b>: para cada vecino todavía pendiente, si llegar pasando por u es más barato, se actualiza su distancia y su <code>prev</code>.'],
+ ['return dist, prev',1,'Devuelve las dos cosas. Se recibe con <code>dist, prev = self.dijkstra(origen)</code>.']],
+camino:[
+ ['def camino',1,'Arma la ruta del origen a <code>destino</code> usando el <code>prev</code> que devolvió Dijkstra (o BFS, o Bellman-Ford).'],
+ ['ruta = []',1,''],
+ ['while destino is not None',3,'Camina <b>hacia atrás</b>: anota el destino y salta a su <code>prev</code>, hasta llegar al origen (cuyo prev es None).'],
+ ['ruta.reverse()',1,'Quedó del final al principio; se voltea.'],
+ ['return ruta',1,'']],
+bellman_ford:[
+ ['def bellman_ford',1,'Acepta pesos <b>negativos</b> y detecta ciclos negativos.'],
+ ['dist = {}',6,'Igual que Dijkstra: todos en infinito y el inicio en 0.'],
+ ['aristas = []',4,'Lista de <b>todas</b> las aristas (u, v, peso), en orden. Ese orden es el que se sigue en la tabla a mano.'],
+ ['for i in range(len(self.ady) - 1)',1,'<b>V − 1 rondas</b> (un camino sin ciclos tiene a lo sumo V − 1 aristas).'],
+ ['for u, v, peso in aristas',4,'En cada ronda se relajan TODAS las aristas. Si <code>dist[u]</code> es infinito, <code>INF + peso</code> sigue siendo infinito y no cambia nada.'],
+ ['for u, v, peso in aristas',3,'Una ronda <b>más</b>: si algo todavía mejora, hay un ciclo negativo y no existe camino más corto.'],
+ ['return dist, prev',1,'']],
+floyd_warshall:[
+ ['def floyd_warshall',1,'Sin parámetros: calcula las distancias entre <b>todas</b> las parejas.'],
+ ['vs = sorted(self.ady)',2,'Lista de vértices: la fila/columna <code>i</code> de la matriz es el vértice <code>vs[i]</code>.'],
+ ['d = []',11,'Arma <b>D⁰</b>: 0 en la diagonal, el peso si hay arista vs[i] → vs[j], infinito si no.'],
+ ['for k in range(n)',5,'Para cada <b>k</b> (vértice por el que se deja pasar) y cada pareja i, j: si ir de i a k y de k a j es más corto que lo que había, se reemplaza. <b>k va afuera</b>.'],
+ ['return vs, d',1,'Devuelve los vértices y la matriz final.']],
+prim:[
+ ['def prim',1,'Parámetro: el vértice donde empieza el árbol (cualquiera; el total es el mismo).'],
+ ['en_arbol = [inicio]',3,'El árbol empieza solo con el inicio; sin aristas y total 0.'],
+ ['while len(en_arbol) < len(self.ady)',1,'Hasta que todos estén en el árbol.'],
+ ['mejor = None',1,'Todavía no se ha encontrado ninguna arista candidata.'],
+ ['for u in sorted(en_arbol)',5,'Revisa todas las aristas que <b>salen</b> del árbol (u adentro, v afuera) y se queda con la más barata.'],
+ ['if mejor is None',2,'Si no hubo ninguna, el grafo no es conexo: termina.'],
+ ['en_arbol.append(mejor[1])',3,'Mete el vértice nuevo, guarda la arista y suma su peso.'],
+ ['return aristas, total',1,'']],
+kruskal:[
+ ['def kruskal',1,'Sin parámetros.'],
+ ['lista = []',5,'Todas las aristas como <b>(peso, u, v)</b>. <code>u &lt; v</code> para no meter cada arista dos veces. El peso va de primero para que <code>sort</code> ordene por peso.'],
+ ['lista.sort()',1,'De la más barata a la más cara. (Si prohíben sort, se busca el mínimo en cada vuelta.)'],
+ ['padre = {}',3,'Union-find: cada vértice empieza siendo su propio grupo.'],
+ ['aristas = []',2,''],
+ ['for peso, u, v in lista',1,'Recorre las aristas de la más barata a la más cara.'],
+ ['ru = buscar(padre, u)',2,'Grupo (raíz) de cada extremo.'],
+ ['if ru != rv',4,'Si están en grupos distintos, la arista <b>no forma ciclo</b>: une los grupos y la toma. Si están en el mismo grupo, se salta.'],
+ ['return aristas, total',1,'']],
+buscar:[
+ ['def buscar',1,'Función aparte (fuera de la clase): devuelve la raíz del grupo de x.'],
+ ['while padre[x] != x',2,'Sube por los padres hasta llegar al que es su propio padre: la raíz.'],
+ ['return x',1,'']],
+boruvka:[
+ ['def boruvka',1,'Sin parámetros. Trabaja por <b>rondas</b>.'],
+ ['padre = {}',3,'Union-find: cada vértice es su propio grupo.'],
+ ['aristas = []',3,'Al principio hay V componentes.'],
+ ['while componentes > 1',1,'Mientras no esté todo unido.'],
+ ['barata = {}',1,'<code>barata[raíz]</code> = la arista más barata que sale de ese grupo.'],
+ ['for u in self.ady',8,'Para cada arista entre grupos distintos: si es más barata que la que tenía el grupo de u, la reemplaza. La tupla (peso, menor, mayor) desempata siempre igual.'],
+ ['if len(barata) == 0',2,'Ningún grupo tiene aristas hacia afuera: no es conexo.'],
+ ['for peso, u, v in sorted(set(barata.values()))',8,'Junta las escogidas (<code>set</code> quita repetidas: dos grupos pueden escoger la misma) y agrega cada una si todavía une grupos distintos.'],
+ ['return aristas, total',1,'']],
+ford_fulkerson:[
+ ['def ford_fulkerson',1,'Grafo dirigido con <b>capacidades</b>. Parámetros: <code>fuente</code> y <code>sumidero</code>.'],
+ ['residual = {}',3,'Grafo residual: cuánto <b>sobra</b> en cada arista.'],
+ ['for u in self.ady',3,'Al principio sobra toda la capacidad.'],
+ ['for u in self.ady',4,'Aristas de <b>regreso</b> con 0: por ahí se podrá devolver flujo después.'],
+ ['flujo = 0',2,''],
+ ['while True',1,'Repite mientras haya camino de aumento.'],
+ ['prev = {fuente: None}',8,'<b>BFS</b> desde la fuente usando solo aristas con residual &gt; 0; <code>prev</code> guarda el camino. Para apenas alcanza el sumidero.'],
+ ['if sumidero not in prev',2,'No hay camino: el flujo ya es máximo.'],
+ ['cuello = INF',5,'Recorre el camino hacia atrás buscando lo mínimo que sobra: el <b>cuello de botella</b>.'],
+ ['v = sumidero',5,'Manda el cuello: <b>resta</b> en la dirección del camino y <b>suma</b> en la de regreso.'],
+ ['flujo += cuello',2,'Suma al flujo total y anota el camino usado.'],
+ ['return flujo, caminos',1,'']],
+matriz_adyacencia:[
+ ['def matriz_adyacencia',1,''],
+ ['vs = sorted(self.ady)',1,'El orden de filas y columnas.'],
+ ['m = []',1,''],
+ ['for u in vs',8,'Fila u, columna v: el peso si hay arista u → v, 0 si no. En no dirigido sale simétrica.'],
+ ['return vs, m',1,'']]
+};
+const CODEX_GROUPS={
+ clase:{ms:['__init__','agregar_vertice','agregar_arista','matriz_adyacencia'],title:'la clase Grafo y la matriz'},
+ rec:{ms:['bfs','dfs','dfs_pila'],title:'BFS y DFS'},
+ dij:{ms:['dijkstra','camino'],title:'Dijkstra'},
+ bf:{ms:['bellman_ford'],title:'Bellman-Ford'},
+ fw:{ms:['floyd_warshall'],title:'Floyd-Warshall'},
+ mst:{ms:['prim','kruskal','buscar','boruvka'],title:'Prim, Kruskal y Borůvka'},
+ ff:{ms:['ford_fulkerson'],title:'Ford-Fulkerson'}
+};
+function pyHL(line){
+  const i=line.indexOf('#');const code=i>=0?line.slice(0,i):line,cm=i>=0?line.slice(i):'';
+  return esc(code).replace(/\b(def|class|return|if|elif|else|for|while|in|not|and|or|is|None|True|False|break|continue|import)\b/g,'<span class="kw">$1</span>')+(cm?`<span class="cm">${esc(cm)}</span>`:'');
+}
+function codexMethod(name){
+  const lines=PYM[name].split('\n'),ex=EXPL[name]||[];let from=0;const rows=[];
+  for(const [at,n,t] of ex){
+    let i=lines.findIndex((l,k)=>k>=from&&l.includes(at));
+    if(i<0){rows.push({a:0,b:0,t:'(?) '+t});continue;}
+    rows.push({a:i+1,b:i+n,t});from=i+n;
+  }
+  const id='cx_'+name;
+  const pre=lines.map((l,k)=>`<span class="cl" data-l="${k+1}"><span class="ln">${k+1}</span>${pyHL(l)||' '}</span>`).join('');
+  const tb=rows.filter(r=>r.t).map(r=>`<tr data-a="${r.a}" data-b="${r.b}" tabindex="0"><td class="mono">${r.a===r.b?r.a:r.a+'–'+r.b}</td><td>${r.t}</td></tr>`).join('');
+  return `<div class="cxm" id="${id}"><h4><code>${esc(lines[0].replace(/:\s*$/,'').replace(/^def\s+/,''))}</code></h4><div class="cxgrid"><pre class="code cxcode">${pre}</pre><div class="tscroll"><table class="t cxt"><thead><tr><th>Líneas</th><th>Qué hace</th></tr></thead><tbody>${tb}</tbody></table></div></div></div>`;
+}
+/* ---- ejemplos seguidos paso a paso (calculados con el mismo motor del simulador) ---- */
+const EXG={
+ und:{G:mkG(['A','B','C','D','E'],[['A','B',4],['A','C',2],['B','C',1],['B','D',5],['C','D',8],['C','E',10],['D','E',2]],false),pos:{A:{x:70,y:165},B:{x:220,y:60},C:{x:220,y:270},D:{x:420,y:60},E:{x:420,y:270}}},
+ neg:{G:mkG(['A','B','C','D'],[['A','B',4],['A','C',5],['C','B',-3],['B','D',2],['C','D',3]],true),pos:{A:{x:70,y:165},B:{x:280,y:60},C:{x:280,y:270},D:{x:490,y:165}}},
+ net:{G:mkG(['s','a','b','t'],[['s','a',10],['s','b',5],['a','b',15],['a','t',10],['b','t',10]],true),pos:{s:{x:70,y:165},a:{x:280,y:60},b:{x:280,y:270},t:{x:490,y:165}}}
+};
+const exSvg=k=>`<div class="gbox cxg">${drawGraph(EXG[k].G,EXG[k].pos)}</div>`;
+const T=(head,rows)=>`<div class="tscroll"><table class="t small dtab"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const matT=(vs,m)=>T(['',...vs],vs.map((a,i)=>[`<b>${a}</b>`,...m[i].map(fmt)]));
+function codexExample(k){
+  const G=EXG.und.G,vs=G.vs;
+  if(k==='clase'){const {m}=matrixOf(G);
+    return `${exSvg('und')}<p>Con <code>g = Grafo()</code> y estas 7 llamadas a <code>agregar_arista</code> (A–B 4, A–C 2, B–C 1, B–D 5, C–D 8, C–E 10, D–E 2), queda:</p><pre class="code">self.ady = {\n${vs.map(v=>`    '${v}': {${nb(G,v).map(w=>`'${w}': ${G.adj[v][w]}`).join(', ')}},`).join('\n')}\n}</pre><p><code>g.matriz_adyacencia()</code> da:</p>${matT(vs,m)}`;}
+  if(k==='rec'){const b=bfsT(G,'A'),d=dfsT(G,'A');
+    return `${exSvg('und')}<p><b>BFS desde A</b> → ${pathStr(b.order)}</p>${T(['Sale de la cola (u)','Vecinos nuevos que entran','Cola queda'],b.steps.map(s=>[s.u,s.added.join(', ')||'—',s.queue.join(', ')||'(vacía)']))}
+      <p><b>DFS desde A</b> → ${pathStr(d.order)}</p>${T(['Llamada dfs(…)','Camino de llamadas (pila)'],d.steps.map(s=>[s.u,s.path.join(' → ')]))}
+      <p class="note">En DFS siempre se baja por el vecino menor sin visitar (desde A a B, desde B a C, desde C a D…); cuando un vértice no tiene vecinos nuevos, la llamada termina y se vuelve al anterior.</p>`;}
+  if(k==='dij'){const r=dijkstraT(G,'A');
+    const rows=[['inicio',...vs.map(v=>v==='A'?'0':'∞')]].concat(r.steps.map(s=>[`fija <b>${s.u}</b>`,...vs.map(v=>fmt(s.dist[v])+(s.prev[v]?`<span class="pv">${s.prev[v]}</span>`:''))]));
+    return `${exSvg('und')}<p><b>Dijkstra desde A.</b> Cada fila: el pendiente menor que se fija y cómo quedan las distancias (en pequeño, el <code>prev</code>).</p>${T(['Paso',...vs],rows)}
+      <p><code>self.camino(prev, 'E')</code>: E ← ${pathTo(r.prev,'E').slice(0,-1).reverse().join(' ← ')} → volteado: <b>${pathStr(pathTo(r.prev,'E'))}</b>, costo ${r.dist.E}.</p>`;}
+  if(k==='bf'){const N=EXG.neg.G,r=bellmanT(N,'A');
+    return `${exSvg('neg')}<p><b>Bellman-Ford desde A</b> (tiene un peso negativo: C→B = −3). Orden de aristas: ${r.E.map(([u,v,w])=>`${u}→${v} (${fmt(w)})`).join(', ')}.</p>${T(['Ronda',...N.vs],r.rows.map((row,i)=>[i,...N.vs.map(v=>fmt(row[v]))]))}
+      <p class="note">En la ronda 1, B primero queda en 4 (por A→B) y más adelante en la misma ronda baja a 2 (por C→B). Dijkstra habría fijado B = 4 antes de ver la arista negativa. ${r.neg?'Hay ciclo negativo.':'La ronda extra no mejora nada: no hay ciclo negativo.'}</p>`;}
+  if(k==='fw'){const r=floydT(G);
+    return `${exSvg('und')}<p><b>D⁰</b> (pesos directos):</p>${matT(r.vs,r.mats[0])}<p><b>Matriz final</b> (después de k = A, B, C, D, E):</p>${matT(r.vs,r.mats[r.mats.length-1])}
+      <details><summary>Ver las intermedias</summary>${r.mats.slice(1,-1).map((m,i)=>`<p><b>D<sup>${i+1}</sup></b> (dejando pasar por ${r.vs[i]})</p>${matT(r.vs,m)}`).join('')}</details>`;}
+  if(k==='mst'){const p=primT(G,'A'),kr=kruskalT(G),bo=boruvkaT(G);
+    return `${exSvg('und')}<p><b>Prim desde A:</b> ${p.edges.map(e=>`${e[0]}–${e[1]} (${e[2]})`).join(' → ')} · total <b>${p.total}</b></p>
+      <p><b>Kruskal</b> (lista ordenada):</p>${T(['Arista','Peso','¿La toma?'],kr.steps.map(s=>[`${s.u}–${s.v}`,s.w,s.ok?'✓ grupos distintos':'✗ formaría ciclo']))}<p>Total <b>${kr.total}</b>.</p>
+      <p><b>Borůvka:</b></p>${T(['Ronda','Cada grupo escoge su más barata','Se agregan'],bo.rounds.map((rd,i)=>[i+1,rd.picks.map(pk=>`{${pk.group.join(',')}} → ${pk.edge[1]}–${pk.edge[2]} (${pk.edge[0]})`).join('<br>'),rd.added.map(a=>`${a[0]}–${a[1]}`).join(', ')]))}<p>Total <b>${bo.total}</b>. Los tres dan el mismo peso.</p>`;}
+  if(k==='ff'){const N=EXG.net.G,r=ffT(N,'s','t');
+    return `${exSvg('net')}<p><b>Ford-Fulkerson de s a t</b> (caminos con BFS):</p>${T(['#','Camino de aumento','Cuello','Flujo total'],r.iters.map((it,i)=>[i+1,pathStr(it.path),it.b,it.flow]))}
+      <p>Flujo máximo <b>${r.flow}</b>. Corte mínimo: lado de s = {${r.cutS.join(', ')}}; las aristas que salen de ese lado suman ${N.edges.filter(e=>r.cutS.includes(e.u)&&!r.cutS.includes(e.v)).reduce((a,e)=>a+e.w,0)}.</p>`;}
+  return '';
+}
+$$('.codex').forEach(el=>{
+  const g=CODEX_GROUPS[el.dataset.g];
+  el.innerHTML=`<details><summary>Ver el código de ${g.title}, explicado línea por línea</summary><p class="note">Toque una fila de la tabla para resaltar esas líneas en el código.</p>${g.ms.map(codexMethod).join('')}<h4>Ejemplo seguido paso a paso</h4>${codexExample(el.dataset.g)}</details>`;
+});
+function cxHL(tr){const box=tr.closest('.cxm'),a=+tr.dataset.a,b=+tr.dataset.b;
+  $$('.cl',box).forEach(l=>l.classList.toggle('hl',+l.dataset.l>=a&&+l.dataset.l<=b));$$('tr',box).forEach(r=>r.classList.toggle('on',r===tr));}
+document.addEventListener('click',e=>{const tr=e.target.closest('.cxt tbody tr');if(tr)cxHL(tr);});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const tr=e.target.closest&&e.target.closest('.cxt tbody tr');if(tr){e.preventDefault();cxHL(tr);}});
 
 /* ===================== ¿QUÉ ALGORITMO USO? ===================== */
 const QOPT=[['bfs','BFS (anchura)'],['dfs','DFS (profundidad)'],['dij','Dijkstra'],['bf','Bellman-Ford'],['fw','Floyd-Warshall'],['mst','MST (Prim / Kruskal / Borůvka)'],['ff','Ford-Fulkerson'],['topo','Orden topológico']];
