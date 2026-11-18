@@ -1,3 +1,8 @@
+# Talleres de Estructuras de Datos
+
+- **Parcial 1 — Árboles AVL:** https://sperezz33.github.io/taller-arboles-avl/
+- **Parcial 2 — Grafos:** https://sperezz33.github.io/taller-arboles-avl/grafos.html
+
 # Taller de Árboles AVL
 
 Página para estudiar **BST y árboles AVL** para el parcial de Estructuras de Datos. Corrige sus respuestas y le explica cada paso.
@@ -29,4 +34,21 @@ Página para estudiar **BST y árboles AVL** para el parcial de Estructuras de D
 
 ```bash
 python arboles.py
+```
+
+# Taller de Grafos
+
+**Abrir la página:** https://sperezz33.github.io/taller-arboles-avl/grafos.html
+
+| Sección | Para qué sirve |
+|---|---|
+| **Guía** | Cuál algoritmo usar, recetas a mano, complejidades y cómo responder el punto 2 |
+| **Simulador** | Grafos al azar: BFS, DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Prim, Kruskal, Borůvka, Ford-Fulkerson y matriz de adyacencia, paso a paso con corrección |
+| **¿Qué algoritmo uso?** | 28 enunciados (taller, parcial de las flores y clásicos) con explicación y parámetros |
+| **Python** | Sintaxis para grafos y 19 ejercicios desde cero con revisión y esqueleto |
+
+`grafos.py` tiene todos los algoritmos como métodos de la clase `Grafo`, los 10 ejercicios del taller, el problema de las flores y 3 problemas de práctica tipo punto 2:
+
+```bash
+python grafos.py
 ```
